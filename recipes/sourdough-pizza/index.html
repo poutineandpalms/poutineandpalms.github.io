@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#123f32" />
+    <meta name="description" content="A 48–72 hour cold-fermented sourdough pizza dough for two 14-inch pizzas, combining Dave's practical method with a ripe sourdough starter." />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Sardo × Dave: Long-Ferment Sourdough Pizza" />
+    <meta property="og:description" content="A 48–72 hour cold-fermented sourdough pizza dough for two 14-inch pizzas." />
+    <meta property="og:image" content="https://poutineandpalms.github.io/recipes/sourdough-pizza/pizza.webp" />
+    <link rel="canonical" href="https://poutineandpalms.github.io/recipes/sourdough-pizza/" />
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,700&display=swap" rel="stylesheet" />
+    <title>Sardo × Dave: Long-Ferment Sourdough Pizza</title>
+
+    <script type="application/ld+json">{"@context": "http://schema.org", "@type": "Recipe", "name": "Sardo × Dave: Long-Ferment Sourdough Pizza", "description": "A 48–72 hour cold-fermented sourdough pizza dough that combines Dave's practical home-oven process with a ripe 100%-hydration sourdough starter. Makes two airy, flavorful 14-inch pizzas at about 65% true hydration.", "author": {"@type": "Person", "name": "Alex & Maple"}, "image": "https://poutineandpalms.github.io/recipes/sourdough-pizza/pizza.webp", "prepTime": "PT45M", "cookTime": "PT8M", "totalTime": "P3DT4H", "recipeYield": "2 14-inch pizzas", "recipeCategory": "Pizza", "recipeCuisine": "Italian-American", "recipeIngredient": ["280 g bread flour (in addition to the flour already in the starter)", "120 g all-purpose flour (in addition to the flour already in the starter)", "246 g cold water", "80 g ripe sourdough starter at 100% hydration, fed 4–8 hours before mixing and doubled", "10 g fine sea salt", "8 g olive oil", "8 g sugar for a home oven, or 2 g for a pizza oven over 700°F"], "recipeInstructions": [{"@type": "HowToStep", "text": "Day 1 — Mix day: Dissolve the ripe sourdough starter in the cold water. Add the bread flour and all-purpose flour, then mix to a shaggy mass. Cover and rest for 45–60 minutes."}, {"@type": "HowToStep", "text": "Day 1 — Mix day: Add the fine sea salt, sugar, and olive oil. Pinch and fold until incorporated, deliberately under-mixing the dough rather than developing it fully at this stage."}, {"@type": "HowToStep", "text": "Day 1 — Mix day: Perform 3–4 sets of stretch-and-folds at 30-minute intervals."}, {"@type": "HowToStep", "text": "Day 1 — Mix day: Cover and bulk ferment at room temperature until puffy and approximately 50% risen. In a warm kitchen this may take 3–4 hours from mixing; watch the dough rather than the clock."}, {"@type": "HowToStep", "text": "Day 1 — Mix day: Place the dough in a lightly oiled covered container and refrigerate to begin the cold ferment."}, {"@type": "HowToStep", "text": "Days 2–3 — Cold ferment: Keep the covered dough cold for a total refrigerated fermentation of 48–72 hours. The day before baking, divide it into 2 equal portions of about 375 g each, shape into tight balls, place seam-side down in lightly oiled covered containers, and return them to the refrigerator."}, {"@type": "HowToStep", "text": "Pizza day: Remove the dough balls from the refrigerator 3–4 hours before baking and let them come fully to room temperature."}, {"@type": "HowToStep", "text": "Pizza day: Preheat a pizza steel or stone at the oven's maximum temperature, ideally 500–550°F, for 45–60 minutes."}, {"@type": "HowToStep", "text": "Pizza day: On a floured surface, press each dough ball from the center outward, leaving a puffy rim. Do not use a rolling pin. Top lightly."}, {"@type": "HowToStep", "text": "Pizza day: Bake for 6–8 minutes, until the crust is deeply browned and blistered."}]}</script>
+
+    <style>
+      :root {
+        --ink: #17201c;
+        --pine: #123f32;
+        --pine-soft: #1d5847;
+        --tomato: #e6542d;
+        --tomato-dark: #b83b20;
+        --paper: #ffffff;
+        --mist: #edf2ef;
+        --line: #d2ddd7;
+        --gold: #f1be59;
+        --muted: #53615b;
+        --serif: "Newsreader", Georgia, serif;
+        --sans: "IBM Plex Sans", system-ui, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a { color: inherit; }
+      img { display: block; max-width: 100%; }
+
+      .hero {
+        position: relative;
+        min-height: 640px;
+        overflow: hidden;
+        background: var(--pine);
+        color: white;
+      }
+      .hero img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 58% center;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(8,38,29,.96) 0%, rgba(8,38,29,.83) 38%, rgba(8,38,29,.12) 72%);
+      }
+      .hero-inner {
+        position: relative;
+        z-index: 1;
+        width: min(1180px, calc(100% - 48px));
+        min-height: 640px;
+        margin: 0 auto;
+        display: flex;
+        align-items: flex-end;
+        padding: 76px 0 70px;
+      }
+      .hero-copy { max-width: 650px; }
+      .kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 20px;
+        color: #d9e6df;
+        font-size: .81rem;
+        font-weight: 600;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+      }
+      .kicker::before {
+        content: "";
+        width: 34px;
+        height: 3px;
+        background: var(--tomato);
+      }
+      h1, h2, h3 { font-family: var(--serif); line-height: 1.02; }
+      h1 {
+        margin: 0;
+        max-width: 680px;
+        font-size: clamp(3rem, 7.8vw, 6.8rem);
+        font-weight: 700;
+        letter-spacing: -.045em;
+      }
+      .hero-deck {
+        max-width: 560px;
+        margin: 22px 0 28px;
+        color: #e2ebe6;
+        font-size: clamp(1rem, 1.7vw, 1.25rem);
+        line-height: 1.55;
+      }
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+      }
+      .facts li {
+        padding: 8px 12px;
+        border: 1px solid rgba(255,255,255,.25);
+        background: rgba(9,35,28,.45);
+        font-size: .84rem;
+        font-weight: 500;
+      }
+
+      .recipe-shell {
+        width: min(1120px, calc(100% - 48px));
+        margin: 0 auto;
+        padding: 70px 0 96px;
+      }
+      .intro-grid {
+        display: grid;
+        grid-template-columns: minmax(250px, .72fr) minmax(0, 1.28fr);
+        gap: clamp(44px, 8vw, 110px);
+        align-items: start;
+      }
+      h2 {
+        margin: 0 0 24px;
+        font-size: clamp(2.35rem, 4vw, 4rem);
+        letter-spacing: -.035em;
+      }
+      .lead {
+        max-width: 710px;
+        margin: 0;
+        font-family: var(--serif);
+        font-size: clamp(1.4rem, 2.7vw, 2.1rem);
+        line-height: 1.32;
+      }
+      .formula {
+        margin-top: 30px;
+        padding: 18px 20px 17px;
+        background: var(--mist);
+        border-top: 4px solid var(--pine);
+      }
+      .formula strong { display: block; color: var(--pine); font-size: 1.18rem; }
+      .formula span { color: var(--muted); font-size: .9rem; }
+
+      .ingredients {
+        position: sticky;
+        top: 24px;
+      }
+      .section-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--ink);
+      }
+      .section-label h2 { margin: 0; font-size: 2.5rem; }
+      .yield { color: var(--muted); font-size: .82rem; font-weight: 600; }
+      .ingredient-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+      }
+      .ingredient-list li {
+        display: grid;
+        grid-template-columns: 65px 1fr;
+        gap: 14px;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .measure { color: var(--tomato-dark); font-weight: 600; font-variant-numeric: tabular-nums; }
+      .note {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: .82rem;
+        line-height: 1.45;
+      }
+      .flour-note {
+        margin: 20px 0 0;
+        padding: 15px 16px;
+        background: #fff5e1;
+        color: #5d461d;
+        font-size: .9rem;
+      }
+
+      .method h2 { margin-bottom: 28px; }
+      .phase {
+        display: grid;
+        grid-template-columns: 112px 1fr;
+        gap: 24px;
+        padding: 27px 0 32px;
+        border-top: 1px solid var(--line);
+      }
+      .phase:first-of-type { border-top: 3px solid var(--ink); }
+      .day {
+        padding-top: 2px;
+        color: var(--tomato-dark);
+        font-size: .74rem;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .phase h3 {
+        margin: 0 0 16px;
+        font-size: 1.75rem;
+        letter-spacing: -.02em;
+      }
+      .steps { counter-reset: step; margin: 0; padding: 0; list-style: none; }
+      .steps li {
+        counter-increment: step;
+        position: relative;
+        padding: 0 0 16px 40px;
+      }
+      .steps li:last-child { padding-bottom: 0; }
+      .steps li::before {
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: .15em;
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--pine);
+        color: white;
+        font-size: .72rem;
+        font-weight: 600;
+      }
+
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        margin-top: 62px;
+        color: white;
+        background: var(--pine);
+      }
+      .time-block { min-height: 198px; padding: 28px; }
+      .time-block + .time-block { border-left: 1px solid rgba(255,255,255,.2); }
+      .time-block:nth-child(2) { background: var(--pine-soft); }
+      .time-block:nth-child(3) { background: var(--tomato); }
+      .time-block .weekday { color: rgba(255,255,255,.72); font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; }
+      .time-block strong { display: block; margin: 10px 0 8px; font-family: var(--serif); font-size: 1.8rem; line-height: 1.1; }
+      .time-block p { margin: 0; font-size: .88rem; }
+
+      .tips {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        margin-top: 62px;
+        border: 1px solid var(--line);
+      }
+      .tips > div { padding: 30px; }
+      .tips > div + div { border-left: 1px solid var(--line); }
+      .tips h3 { margin: 0 0 12px; font-size: 1.5rem; }
+      .tips p { margin: 0; color: var(--muted); }
+
+      .reference {
+        margin-top: 72px;
+        padding: 38px clamp(24px, 5vw, 58px);
+        background: #f3f6f4;
+        border-left: 7px solid var(--tomato);
+      }
+      .reference h2 { margin-bottom: 12px; font-size: clamp(2rem, 4vw, 3.2rem); }
+      .reference p { max-width: 760px; margin: 0 0 22px; color: var(--muted); }
+      .reference a {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background: var(--ink);
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .reference a::after { content: "↗"; color: var(--gold); font-size: 1.15em; }
+      .reference a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+      footer {
+        padding: 24px;
+        color: #dce7e1;
+        background: #0d2d24;
+        text-align: center;
+        font-size: .78rem;
+      }
+
+      @media (max-width: 780px) {
+        .hero { min-height: 0; }
+        .hero img {
+          position: relative;
+          inset: auto;
+          width: 100%;
+          height: 260px;
+          object-position: 68% 58%;
+        }
+        .hero::after { display: none; }
+        .hero-inner {
+          width: min(100% - 32px, 560px);
+          min-height: 0;
+          padding: 34px 0 40px;
+        }
+        h1 { font-size: clamp(2.8rem, 14vw, 4.3rem); }
+        .hero-deck { margin: 16px 0 20px; }
+        .recipe-shell { width: min(100% - 32px, 640px); padding: 52px 0 72px; }
+        .intro-grid { grid-template-columns: 1fr; gap: 52px; }
+        .ingredients { position: static; }
+        .section-label h2 { font-size: 2.25rem; }
+        .phase { grid-template-columns: 1fr; gap: 8px; padding: 24px 0 28px; }
+        .timeline { grid-template-columns: 1fr; }
+        .time-block { min-height: auto; }
+        .time-block + .time-block { border-left: 0; border-top: 1px solid rgba(255,255,255,.2); }
+        .tips { grid-template-columns: 1fr; }
+        .tips > div + div { border-left: 0; border-top: 1px solid var(--line); }
+      }
+
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+      @media print {
+        .hero { min-height: 340px; }
+        .hero-inner { min-height: 340px; padding: 50px 0; }
+        .hero img { opacity: .45; }
+        .recipe-shell { padding: 38px 0; }
+        .ingredients { position: static; }
+        .reference a { color: black; background: transparent; border: 1px solid black; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="h-recipe" itemscope itemtype="http://schema.org/Recipe">
+      <meta itemprop="name" content="Sardo × Dave: Long-Ferment Sourdough Pizza" />
+      <meta itemprop="description" content="A 48–72 hour cold-fermented sourdough pizza dough that combines Dave's practical home-oven process with a ripe 100%-hydration sourdough starter." />
+      <meta itemprop="author" content="Alex & Maple" />
+      <meta itemprop="prepTime" content="PT45M" />
+      <meta itemprop="cookTime" content="PT8M" />
+      <meta itemprop="totalTime" content="P3DT4H" />
+      <meta itemprop="recipeYield" content="2 14-inch pizzas" />
+      <meta itemprop="recipeCategory" content="Pizza" />
+      <meta itemprop="recipeCuisine" content="Italian-American" />
+      <header class="hero">
+        <img class="u-photo" itemprop="image" src="pizza.webp" alt="Illustrated sourdough pizza with a blistered crust, fresh mozzarella and basil" />
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="kicker">Long-ferment sourdough</p>
+            <h1 class="p-name">Sardo × Dave Pizza</h1>
+            <p class="hero-deck p-summary">Dave’s practical home-oven process, rebuilt around a ripe starter and a slow 48–72 hour cold ferment.</p>
+            <ul class="facts" aria-label="Recipe details">
+              <li class="p-yield">2 × 14-inch pizzas</li>
+              <li>~65% hydration</li>
+              <li>48–72 hours cold</li>
+              <li>6–8 min bake</li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <article class="recipe-shell">
+        <section class="intro-grid">
+          <aside class="ingredients" aria-labelledby="ingredients-title">
+            <div class="section-label">
+              <h2 id="ingredients-title">Dough</h2>
+              <span class="yield">≈ 750 g total</span>
+            </div>
+            <ul class="ingredient-list">
+              <li class="p-ingredient" itemprop="recipeIngredient"><span class="measure">280 g</span><span>bread flour</span></li>
+              <li class="p-ingredient" itemprop="recipeIngredient"><span class="measure">120 g</span><span>all-purpose flour</span></li>
+              <li class="p-ingredient" itemprop="recipeIngredient"><span class="measure">246 g</span><span>cold water</span></li>
+              <li class="p-ingredient" itemprop="recipeIngredient"><span class="measure">80 g</span><span>ripe sourdough starter <span class="note">100% hydration; fed 4–8 hours before mixing and nicely doubled</span></span></li>
+              <li class="p-ingredient" itemprop="recipeIngredient"><span class="measure">10 g</span><span>fine sea salt</span></li>
+              <li class="p-ingredient" itemprop="recipeIngredient"><span class="measure">8 g</span><span>olive oil</span></li>
+              <li class="p-ingredient" itemprop="recipeIngredient"><span class="measure">8 g</span><span>sugar <span class="note">Use 2 g instead in a pizza oven above 700°F</span></span></li>
+            </ul>
+            <p class="flour-note"><strong>Flour note:</strong> the 400 g listed here is in addition to the flour already present in the starter.</p>
+            <div class="formula">
+              <strong>~65% true hydration</strong>
+              <span>Including the flour and water in the starter</span>
+            </div>
+          </aside>
+
+          <section class="method e-instructions" aria-labelledby="method-title">
+            <h2 id="method-title">The method</h2>
+            <p class="lead">Cold water, restrained mixing, folds for strength, and enough time for the dough to become flavorful and relaxed.</p>
+
+            <div class="phase">
+              <div class="day">Day 1</div>
+              <div>
+                <h3>Mix day</h3>
+                <ol class="steps">
+                  <li itemprop="recipeInstructions">Dissolve the starter in the cold water. Add both flours and mix to a shaggy mass. Cover and rest 45–60 minutes.</li>
+                  <li itemprop="recipeInstructions">Add the salt, sugar, and olive oil. Pinch and fold until incorporated. Deliberately under-mix here; the folds will finish the structure.</li>
+                  <li itemprop="recipeInstructions">Perform 3–4 sets of stretch-and-folds, 30 minutes apart.</li>
+                  <li itemprop="recipeInstructions">Cover and bulk ferment at room temperature until puffy and about 50% risen. In a warm kitchen, this may take 3–4 hours from mixing. Watch the dough, not the clock.</li>
+                  <li itemprop="recipeInstructions">Place the dough in a lightly oiled, covered container and refrigerate to begin the cold ferment.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="phase">
+              <div class="day">Days 2–3</div>
+              <div>
+                <h3>Cold ferment</h3>
+                <ol class="steps">
+                  <li itemprop="recipeInstructions">Keep the covered dough cold for a total refrigerated fermentation of 48–72 hours. The day before baking, divide it into two portions of about 375 g each, shape into tight balls, place seam-side down in lightly oiled containers, and return them to the fridge.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="phase">
+              <div class="day">Pizza day</div>
+              <div>
+                <h3>Warm, stretch & bake</h3>
+                <ol class="steps">
+                  <li itemprop="recipeInstructions">Pull the dough balls from the fridge 3–4 hours before baking and let them come fully to room temperature.</li>
+                  <li itemprop="recipeInstructions">Heat a pizza steel or stone at your oven’s maximum, ideally 500–550°F, for a full 45–60 minutes.</li>
+                  <li itemprop="recipeInstructions">On a floured surface, press from the center outward, leaving a puffy rim. Skip the rolling pin to protect the bubbles.</li>
+                  <li itemprop="recipeInstructions">Top lightly, then bake for 6–8 minutes, until the crust is deeply browned and blistered.</li>
+                </ol>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="timeline" aria-label="Example timeline">
+          <div class="time-block">
+            <span class="weekday">Thursday morning</span>
+            <strong>Mix & fold</strong>
+            <p>Bulk until 50% risen, then cover and begin the cold ferment.</p>
+          </div>
+          <div class="time-block">
+            <span class="weekday">Friday</span>
+            <strong>Divide & ball</strong>
+            <p>Shape two 375 g balls the day before baking, then return them to the fridge.</p>
+          </div>
+          <div class="time-block">
+            <span class="weekday">Saturday night</span>
+            <strong>Pizza</strong>
+            <p>Warm the dough for 3–4 hours, stretch, top, and bake.</p>
+          </div>
+        </section>
+
+        <section class="tips" aria-label="Recipe notes">
+          <div>
+            <h3>Why the sugar?</h3>
+            <p>Dave uses it to promote browning in a home oven. Reduce it to 2 g when baking above 700°F, where the intense heat supplies plenty of color.</p>
+          </div>
+          <div>
+            <h3>Starter waking up?</h3>
+            <p>If it has been resting in the refrigerator, give it one or two feeds before mix day. Use it when it is active, doubled, and pleasantly aromatic.</p>
+          </div>
+        </section>
+
+        <section class="reference" aria-labelledby="reference-title">
+          <h2 id="reference-title">Technique reference</h2>
+          <p>Watch Dave from Dave’s Pizza Oven (@davespizzaoven) demonstrate how he makes, stretches, tops, and bakes his “Same Day Sourdough Pizza” in a home oven. His video uses a same-day schedule; this recipe keeps the useful technique while extending fermentation to 48–72 hours.</p>
+          <a href="https://www.instagram.com/reel/DcznyQOuMlp/" target="_blank" rel="noopener noreferrer">Watch Dave’s step-by-step reel</a>
+        </section>
+      </article>
+    </main>
+    <footer>Long fermentation. Light hands. Hot steel.</footer>
+  </body>
+</html>
