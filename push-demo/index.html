@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maple Push Demo</title>
+<meta name="theme-color" content="#161009">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    background: radial-gradient(800px 400px at 50% -10%, #2b1c0c 0%, #161009 60%) fixed, #161009;
+    color: #f7ead9; min-height: 100vh; padding: 2.5rem 1.5rem;
+    display: flex; justify-content: center;
+  }
+  .wrap { max-width: 460px; width: 100%; text-align: center; }
+  .logo { font-size: 3rem; margin-bottom: .5rem; }
+  h1 { font-size: 1.6rem; margin-bottom: .5rem; }
+  p { color: #c9ab84; line-height: 1.6; font-size: .95rem; margin-bottom: 1rem; }
+  .warn {
+    background: #3a2a17; border: 1px solid #6b4d24; border-radius: 12px;
+    padding: .9rem 1rem; font-size: .9rem; color: #f7ead9; margin-bottom: 1.25rem;
+    text-align: left; line-height: 1.55;
+  }
+  button {
+    background: linear-gradient(135deg, #ff9a3c, #e2481f); color: #1c1006;
+    border: none; border-radius: 999px; padding: .9rem 2.2rem;
+    font-size: 1.05rem; font-weight: 700; cursor: pointer; margin: 0.5rem 0 1.25rem;
+  }
+  button:disabled { opacity: .45; cursor: default; }
+  #status {
+    background: #241a0e; border: 1px solid #3a2a17; border-radius: 12px;
+    padding: 1rem; font-size: .9rem; min-height: 3.2em; text-align: left;
+    white-space: pre-wrap; word-break: break-word; margin-bottom: 1rem;
+  }
+  details { text-align: left; font-size: .8rem; color: #c9ab84; }
+  details textarea {
+    width: 100%; height: 120px; margin-top: .5rem; font-size: .7rem;
+    background: #100b06; color: #c9ab84; border: 1px solid #3a2a17; border-radius: 8px;
+    padding: .5rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">🍁</div>
+  <h1>Maple Push Demo</h1>
+  <p>A prototype: push notifications from Maple, straight to this app on your lock screen.</p>
+  <div class="warn" id="installWarn" hidden>
+    ⚠️ On iPhone, open this page in <b>Safari</b>, tap <b>Share → Add to Home Screen</b>,
+    then open it from the new home screen icon before subscribing.
+  </div>
+  <button id="subBtn">Enable push notifications</button>
+  <div id="status">Not subscribed yet.</div>
+  <details>
+    <summary>Subscription details (backup)</summary>
+    <textarea id="subJson" readonly placeholder="Your subscription will appear here after subscribing."></textarea>
+  </details>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
