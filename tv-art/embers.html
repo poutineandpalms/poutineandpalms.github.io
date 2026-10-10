@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autumn Embers</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0a0605; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+(function () {
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  var W, H;
+  function resize() { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  var N = 130, P = [];
+  function spawn(anywhere) {
+    return {
+      x: Math.random() * W,
+      y: anywhere ? Math.random() * H : H + 12,
+      r: 1 + Math.random() * 3.2,
+      vy: 0.25 + Math.random() * 1.0,
+      sway: 0.4 + Math.random() * 1.4,
+      ph: Math.random() * 6.283,
+      hue: 12 + Math.random() * 32,          /* reds -> oranges -> golds */
+      tw: Math.random() * 6.283,             /* twinkle phase */
+      tws: 0.02 + Math.random() * 0.05
+    };
+  }
+  for (var i = 0; i < N; i++) P.push(spawn(true));
+
+  var t = 0;
+  function frame() {
+    t += 0.016;
+    /* translucent fill = motion trails */
+    ctx.fillStyle = 'rgba(10,6,5,0.22)';
+    ctx.fillRect(0, 0, W, H);
+    for (var i = 0; i < P.length; i++) {
+      var p = P[i];
+      p.y -= p.vy;
+      p.ph += 0.008;
+      p.tw += p.tws;
+      var x = p.x + Math.sin(p.ph) * 34 * p.sway * 0.35;
+      var flicker = 0.55 + 0.45 * Math.sin(p.tw);
+      var a = Math.max(0, Math.min(1, flicker));
+      /* halo */
+      ctx.beginPath();
+      ctx.fillStyle = 'hsla(' + p.hue + ',95%,55%,' + (0.10 * a) + ')';
+      ctx.arc(x, p.y, p.r * 3.4, 0, 6.283);
+      ctx.fill();
+      /* core */
+      ctx.beginPath();
+      ctx.fillStyle = 'hsla(' + (p.hue + 12) + ',100%,68%,' + (0.85 * a) + ')';
+      ctx.arc(x, p.y, p.r, 0, 6.283);
+      ctx.fill();
+      if (p.y < -14) P[i] = spawn(false);
+    }
+    requestAnimationFrame(frame);
+  }
+  /* paint bg once, then let trails do the work */
+  ctx.fillStyle = '#0a0605';
+  ctx.fillRect(0, 0, W, H);
+  frame();
+})();
+</script>
+</body>
+</html>
