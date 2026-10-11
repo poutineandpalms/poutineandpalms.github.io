@@ -10,48 +10,56 @@
   html, body { height: 100%; }
   body {
     font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: radial-gradient(1400px 900px at 38% 45%, #2b2118 0%, #171310 55%, #0d0b09 100%);
-    color: #f5efe6;
+    background: #faf9f7;
+    color: #202124;
     display: flex; align-items: center; justify-content: center;
-    gap: 96px;
+    gap: 72px;
     overflow: hidden;
-    padding: 0 80px;
+    padding: 0 64px;
   }
-  /* ---- avatar with maple AI ring ---- */
+  /* ---- avatar with orbit dots ---- */
   .avatar-wrap {
     position: relative;
-    width: 400px; height: 400px;
+    width: 320px; height: 320px;
     flex: 0 0 auto;
-    animation: float 5s ease-in-out infinite;
+    display: flex; align-items: center; justify-content: center;
+    transition: width .6s ease, height .6s ease;
   }
-  .avatar-wrap::before {
-    /* spinning maple-hue conic ring */
-    content: "";
-    position: absolute; inset: -20px;
-    border-radius: 50%;
-    background: conic-gradient(from 0deg,
-      #b3271e, #e8933c, #f5d76e, #e8933c, #b3271e,
-      #7e1d16, #e8933c, #b3271e);
-    animation: spin 14s linear infinite;
-    filter: blur(3px) saturate(1.15);
-  }
-  .avatar-wrap::after {
-    /* breathing halo — the "thinking" pulse */
-    content: "";
-    position: absolute; inset: -20px;
-    border-radius: 50%;
-    animation: breathe 2.8s ease-in-out infinite;
-  }
-  /* talking state: ring goes more active */
-  body.is-playing .avatar-wrap::before { animation-duration: 5s; }
-  body.is-playing .avatar-wrap::after { animation: breathe-fast 1.3s ease-in-out infinite; }
-  .avatar-stage {
+  body.is-playing .avatar-wrap { width: 240px; height: 240px; }
+  .orbit {
     position: absolute; inset: 0;
+    animation: orbit-spin 24s linear infinite;
+  }
+  body.is-thinking .orbit { animation-duration: 4s; }
+  body.is-playing .orbit { animation-duration: 10s; }
+  @keyframes orbit-spin { to { transform: rotate(360deg); } }
+  .odot {
+    position: absolute; border-radius: 50%;
+    top: 50%; left: 50%;
+  }
+  /* 5 dots, varied sizes and Maple palette colors, positioned on orbit */
+  .odot:nth-child(1) { width: 18px; height: 18px; background: #d64545; margin: -9px 0 0 -9px; transform: rotate(0deg) translateX(150px) rotate(0deg); }
+  .odot:nth-child(2) { width: 12px; height: 12px; background: #f5a623; margin: -6px 0 0 -6px; transform: rotate(72deg) translateX(150px) rotate(-72deg); }
+  .odot:nth-child(3) { width: 15px; height: 15px; background: #e8788a; margin: -7.5px 0 0 -7.5px; transform: rotate(144deg) translateX(150px) rotate(-144deg); }
+  .odot:nth-child(4) { width: 10px; height: 10px; background: #c98a2e; margin: -5px 0 0 -5px; transform: rotate(216deg) translateX(150px) rotate(-216deg); }
+  .odot:nth-child(5) { width: 14px; height: 14px; background: #b3271e; margin: -7px 0 0 -7px; transform: rotate(288deg) translateX(150px) rotate(-288deg); }
+  body.is-playing .odot:nth-child(1) { transform: rotate(0deg) translateX(112px) rotate(0deg); }
+  body.is-playing .odot:nth-child(2) { transform: rotate(72deg) translateX(112px) rotate(-72deg); }
+  body.is-playing .odot:nth-child(3) { transform: rotate(144deg) translateX(112px) rotate(-144deg); }
+  body.is-playing .odot:nth-child(4) { transform: rotate(216deg) translateX(112px) rotate(-216deg); }
+  body.is-playing .odot:nth-child(5) { transform: rotate(288deg) translateX(112px) rotate(-288deg); }
+  body.is-thinking .odot { box-shadow: 0 0 10px currentColor; }
+  .avatar-stage {
+    position: relative;
+    width: 200px; height: 200px;
     border-radius: 50%;
     overflow: hidden;
-    background: #241d16;
+    background: #fff;
     z-index: 1;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    transition: width .6s ease, height .6s ease;
   }
+  body.is-playing .avatar-stage { width: 150px; height: 150px; }
   .avatar-stage video {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
@@ -60,83 +68,74 @@
     transition: opacity 0.6s ease;
   }
   .avatar-stage video.active { opacity: 1; }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-12px); }
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  @keyframes breathe {
-    0%, 100% { box-shadow: 0 0 55px 10px rgba(227, 120, 40, 0.30); }
-    50%      { box-shadow: 0 0 110px 26px rgba(227, 120, 40, 0.55); }
-  }
-  @keyframes breathe-fast {
-    0%, 100% { box-shadow: 0 0 70px 14px rgba(227, 120, 40, 0.45); }
-    50%      { box-shadow: 0 0 150px 40px rgba(245, 180, 60, 0.85); }
-  }
   /* ---- text block ---- */
   .meta {
     flex: 1 1 auto;
-    max-width: 640px;
+    max-width: 700px;
     text-align: left;
     display: flex; flex-direction: column;
     min-height: 0;
   }
   h1 {
-    font-size: 92px;
-    font-weight: 800;
-    letter-spacing: 1px;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
     line-height: 1;
     white-space: nowrap;
-    transition: font-size 0.8s ease, opacity 0.8s ease;
+    transition: font-size 0.8s ease;
+    color: #202124;
   }
-  h1 .leaf { color: #e8933c; }
-  body.is-playing h1 {
-    font-size: 40px;
-    opacity: 0.85;
-  }
+  h1 .leaf { color: #d64545; }
+  body.is-playing h1 { font-size: 36px; }
   .sub {
-    margin-top: 14px;
-    font-size: 26px;
-    color: #b9a88f;
-    letter-spacing: 6px;
+    margin-top: 10px;
+    font-size: 18px;
+    color: #5f6368;
+    letter-spacing: 4px;
     text-transform: uppercase;
   }
-  /* ---- transcript ---- */
+  /* ---- transcript with line highlighting ---- */
   .transcript-wrap {
-    margin-top: 26px;
+    margin-top: 24px;
     max-height: 0;
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
     overflow: hidden;
     transition: max-height 0.9s ease, opacity 0.9s ease, transform 0.9s ease;
   }
   body.is-playing .transcript-wrap {
-    max-height: 420px;
+    max-height: 460px;
     opacity: 1;
     transform: translateY(0);
   }
   .transcript {
-    max-height: 420px;
+    max-height: 460px;
     overflow-y: auto;
-    font-size: 33px;
-    line-height: 1.55;
-    color: #efe7d8;
-    padding-right: 18px;
+    font-size: 26px;
+    line-height: 1.6;
+    padding-right: 16px;
     scrollbar-width: none;
   }
   .transcript::-webkit-scrollbar { display: none; }
+  .tline {
+    color: #b8b0a4; /* pale = not yet read */
+    transition: color 0.5s ease;
+    margin-bottom: 8px;
+  }
+  .tline.current { color: #202124; /* dark = being read */ font-weight: 500; }
+  .tline.read { color: #5f6368; /* medium = already read */ }
   .hint {
-    position: absolute; bottom: 26px; left: 0; right: 0;
+    position: absolute; bottom: 20px; left: 0; right: 0;
     text-align: center;
-    font-size: 18px; color: #6f6252; letter-spacing: 2px;
+    font-size: 13px; color: #c9c2b8; letter-spacing: 1px;
   }
 </style>
 </head>
 <body class="is-idle">
-  <cast-media-player style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0"></cast-media-player>
-  <div class="avatar-wrap">
+  <div class="avatar-wrap" id="avatar-wrap">
+    <div class="orbit" id="orbit">
+      <div class="odot"></div><div class="odot"></div><div class="odot"></div><div class="odot"></div><div class="odot"></div>
+    </div>
     <div class="avatar-stage">
       <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
       <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
@@ -149,22 +148,21 @@
       <div class="transcript" id="transcript"></div>
     </div>
   </div>
-  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v13</div>
+  <div class="hint" id="hint"></div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v16';
+  var RECEIVER_VERSION = 'js-v17';
   var hintEl = document.getElementById('hint');
-  // runtime version stamp: proves THIS script executed (not a cached copy)
-  hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
   var transcriptEl = document.getElementById('transcript');
   var vidIdle = document.getElementById('vid-idle');
   var vidSpeaking = document.getElementById('vid-speaking');
-  var playerManager = null;
   var scrollRaf = null;
+  var lineEls = [];
+  var thinkingTimeout = null;
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -187,14 +185,6 @@
   }
 
   function getPosition() {
-    // returns {time, duration} in seconds, or null
-    try {
-      if (playerManager) {
-        var t = playerManager.getCurrentTimeSec();
-        var d = playerManager.getDurationSec();
-        if (isFinite(t) && isFinite(d) && d > 0) return { time: t, duration: d };
-      }
-    } catch (e) {}
     var a = document.getElementById('fallback-audio');
     if (a && isFinite(a.duration) && a.duration > 0) {
       return { time: a.currentTime || 0, duration: a.duration };
@@ -202,15 +192,27 @@
     return null;
   }
 
-  function driveScroll() {
+  function driveHighlight() {
     stopScroll();
     var step = function () {
       var pos = getPosition();
-      if (pos) {
-        var max = transcriptEl.scrollHeight - transcriptEl.clientHeight;
-        if (max > 0) {
-          var p = Math.min(1, Math.max(0, pos.time / pos.duration));
-          transcriptEl.scrollTop = p * max;
+      if (pos && lineEls.length > 0) {
+        var p = Math.min(1, Math.max(0, pos.time / pos.duration));
+        var idx = Math.min(lineEls.length - 1, Math.floor(p * lineEls.length));
+        for (var i = 0; i < lineEls.length; i++) {
+          lineEls[i].classList.toggle('current', i === idx);
+          lineEls[i].classList.toggle('read', i < idx);
+        }
+        // auto-scroll to keep current line visible
+        var cur = lineEls[idx];
+        if (cur) {
+          var wrapTop = transcriptEl.scrollTop;
+          var wrapBottom = wrapTop + transcriptEl.clientHeight;
+          var lineTop = cur.offsetTop;
+          var lineBottom = lineTop + cur.offsetHeight;
+          if (lineTop < wrapTop || lineBottom > wrapBottom) {
+            transcriptEl.scrollTop = lineTop - transcriptEl.clientHeight / 2;
+          }
         }
       }
       scrollRaf = requestAnimationFrame(step);
@@ -221,8 +223,33 @@
   function setPlayingUI(playing) {
     document.body.classList.toggle('is-playing', !!playing);
     document.body.classList.remove('is-idle');
+    document.body.classList.remove('is-thinking');
     setAvatarMode(playing ? 'speaking' : 'idle');
-    if (playing) driveScroll(); else stopScroll();
+    if (playing) driveHighlight(); else stopScroll();
+  }
+
+  function setThinkingUI() {
+    document.body.classList.add('is-thinking');
+    document.body.classList.remove('is-idle');
+    setAvatarMode('speaking');
+  }
+
+  function splitIntoLines(text) {
+    // Split into sentences, then group into lines of ~10 words for Hub readability
+    var sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+    var lines = [];
+    var current = [];
+    var wordCount = 0;
+    sentences.forEach(function (s) {
+      var words = s.trim().split(/\s+/);
+      if (wordCount + words.length > 12 && current.length > 0) {
+        lines.push(current.join(' '));
+        current = []; wordCount = 0;
+      }
+      current.push(s.trim()); wordCount += words.length;
+    });
+    if (current.length > 0) lines.push(current.join(' '));
+    return lines;
   }
 
   function playAudio(url) {
@@ -230,51 +257,57 @@
     try {
       a.src = url;
       a.onended = function () { setPlayingUI(false); };
+      a.onplaying = function () {
+        // audio actually started -> switch from thinking to talking
+        if (thinkingTimeout) { clearTimeout(thinkingTimeout); thinkingTimeout = null; }
+        setPlayingUI(true);
+      };
       var p = a.play();
-      if (p && p.catch) p.catch(function (e) { hintEl.textContent = 'audio blocked: ' + e; hintEl.style.display = 'block'; });
-      else { hintEl.textContent = 'audio element playing'; hintEl.style.display = 'block'; }
-    } catch (e) { hintEl.textContent = 'audio error: ' + e; hintEl.style.display = 'block'; }
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
   }
 
   var lastMsgText = null;
   function handleMessage(d) {
     d = d || {};
-    if (d.text && d.text === lastMsgText) return; // ignore duplicates
+    if (d.text && d.text === lastMsgText) return;
     lastMsgText = d.text || null;
     if (d.title) titleEl.innerHTML = escapeHtml(d.title) + ' <span class="leaf">🍁</span>';
     if (d.subtitle) subEl.textContent = d.subtitle;
     if (d.text) {
-      transcriptEl.textContent = d.text;
+      var lines = splitIntoLines(d.text);
+      transcriptEl.innerHTML = '';
+      lineEls = [];
+      lines.forEach(function (ln) {
+        var div = document.createElement('div');
+        div.className = 'tline';
+        div.textContent = ln;
+        transcriptEl.appendChild(div);
+        lineEls.push(div);
+      });
       transcriptEl.scrollTop = 0;
     }
-    hintEl.style.display = 'none';
     if (d.audio_url) {
+      // thinking state: fast orbit for 1.5s, then audio starts -> talking
+      setThinkingUI();
+      if (thinkingTimeout) clearTimeout(thinkingTimeout);
+      thinkingTimeout = setTimeout(function () {
+        setPlayingUI(true); // fallback if onplaying doesn't fire
+      }, 4000);
       playAudio(d.audio_url);
-      setPlayingUI(true);
     }
   }
 
   var isDemo = location.search.indexOf('demo=1') >= 0;
-
   if (isDemo) {
-    hintEl.textContent = 'demo preview — no Cast framework';
     setTimeout(function () {
       handleMessage({
         title: 'Maple',
-        subtitle: 'Morning briefing',
-        text: 'Good morning, Alex! Here is what is happening today. ' +
-          'You have a focus block until ten, then the product review at eleven. ' +
-          'The kitchen speaker demo went great yesterday, and the custom receiver ' +
-          'is now live on every screen in the house. ' +
-          'Weather is sunny with a high of twenty-eight degrees. Have a great day!'
+        subtitle: 'Voice note',
+        text: 'Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.',
+        audio_url: 'maple-voice-rx-1791741257.mp3'
       });
-      setPlayingUI(true);
-      // demo: fake a 24s playback for the scroll driver
-      var t0 = Date.now();
-      getPosition = function () {
-        return { time: (Date.now() - t0) / 1000 % 25, duration: 24 };
-      };
-    }, 1200);
+    }, 1000);
   } else if (window.cast && window.cast.receiver) {
     var mgr = cast.receiver.CastReceiverManager.getInstance();
     var bus = mgr.getCastMessageBus(NAMESPACE);
@@ -283,20 +316,9 @@
       catch (e) { try { handleMessage(event.data); } catch (x) {} }
     };
     mgr.onSenderConnected = function (event) {
-      try { bus.send(event.senderId, JSON.stringify({type: 'READY', version: 'js-v16'})); } catch (e) {}
+      try { bus.send(event.senderId, JSON.stringify({type: 'READY', version: RECEIVER_VERSION})); } catch (e) {}
     };
     try { mgr.start({statusText: 'Maple'}); } catch (e) {}
-    hintEl.style.display = 'none'; // clean loading state, no placeholder text
-    try {
-      var appData = mgr.getApplicationData();
-      if (appData) {
-        var d = appData;
-        if (typeof d === 'string') { try { d = JSON.parse(d); } catch (e) {} }
-        if (d && (d.text || d.title || d.audio_url)) handleMessage(d);
-      }
-    } catch (e) {}
-  } else {
-    hintEl.textContent = 'cast framework not loaded';
   }
 })();
 </script>
