@@ -235,6 +235,7 @@
     }
     var a = document.getElementById('fallback-audio');
     a.src = url;
+    a.onended = function () { setPlayingUI(false); };
     var p = a.play();
     if (p && p.catch) p.catch(function () {});
     // fallback element drives the scroll via timeupdate
@@ -284,8 +285,12 @@
     });
     playerManager = context.getPlayerManager();
     playerManager.addEventListener(
-      cast.framework.events.EventType.PLAYER_STATE_CHANGED,
-      function (e) { setPlayingUI(e.status === 'PLAYING'); }
+      cast.framework.events.EventType.STATE_CHANGED,
+      function () {
+        var st = null;
+        try { st = playerManager.getPlayerState(); } catch (e) {}
+        setPlayingUI(st === 'PLAYING');
+      }
     );
     var options = new cast.framework.CastReceiverOptions();
     options.disableIdleTimeout = true;
