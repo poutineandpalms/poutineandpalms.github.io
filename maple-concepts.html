@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maple Receiver — Design Concepts</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Google Sans', 'Product Sans', Roboto, Arial, sans-serif; background: #f5f3ef; color: #202124; }
+  header { padding: 32px 40px 16px; max-width: 1200px; margin: 0 auto; }
+  header h1 { font-size: 28px; font-weight: 500; }
+  header p { color: #5f6368; margin-top: 8px; font-size: 15px; line-height: 1.5; max-width: 720px; }
+  .concept { max-width: 1200px; margin: 32px auto; background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  .concept-head { padding: 24px 32px 0; display: flex; align-items: baseline; gap: 16px; }
+  .concept-head h2 { font-size: 22px; font-weight: 500; }
+  .concept-head .tag { font-size: 13px; color: #fff; background: #d64545; border-radius: 999px; padding: 3px 12px; }
+  .concept-head p { padding: 8px 32px 0; color: #5f6368; font-size: 14px; width: 100%; }
+  .stage-wrap { padding: 24px 32px 8px; }
+  .stage { position: relative; width: 100%; aspect-ratio: 16/7.2; border-radius: 16px; overflow: hidden; background: #faf9f7; border: 1px solid #e8e2d9; }
+  .controls { display: flex; gap: 12px; padding: 16px 32px 28px; align-items: center; }
+  .controls button { font: inherit; font-size: 14px; padding: 8px 20px; border-radius: 999px; border: 1px solid #dadce0; background: #fff; cursor: pointer; }
+  .controls button.active { background: #202124; color: #fff; border-color: #202124; }
+  .controls span { font-size: 13px; color: #5f6368; }
+
+  /* ===== shared receiver layout ===== */
+  .rx { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 6%; gap: 5%; }
+  .rx-left { position: relative; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; }
+  .rx-avatar { border-radius: 50%; overflow: hidden; background: #fff; position: relative; z-index: 2; transition: width .6s ease, height .6s ease; }
+  .rx-avatar video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .rx-title { margin-top: 14px; font-size: 30px; font-weight: 500; transition: font-size .6s ease; white-space: nowrap; }
+  .rx-title .leaf { font-size: .8em; }
+  .rx-sub { font-size: 14px; color: #5f6368; margin-top: 4px; }
+  .rx-right { flex: 1 1 auto; min-width: 0; }
+  .rx-transcript { font-size: 21px; line-height: 1.55; color: #3c4043; }
+  .rx-hint { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-size: 11px; color: #b0a89c; }
+
+  /* idle vs talking sizes */
+  .rx.idle .rx-avatar { width: 168px; height: 168px; }
+  .rx.idle .rx-title { font-size: 30px; }
+  .rx.talking .rx-avatar { width: 128px; height: 128px; }
+  .rx.talking .rx-title { font-size: 22px; }
+
+  /* ===== Concept A: Aurora Flow ===== */
+  .a-ring { position: absolute; z-index: 1; border-radius: 50%; transition: width .6s ease, height .6s ease;
+    background: conic-gradient(from 0deg, #d64545, #f5a623, #ffd94d, #e8788a, #d64545);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 14px), #000 calc(100% - 12px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 14px), #000 calc(100% - 12px));
+    animation: spin 22s linear infinite; filter: saturate(.85); }
+  .rx.idle .a-ring { width: 196px; height: 196px; }
+  .rx.talking .a-ring { width: 152px; height: 152px; animation-duration: 7s; filter: saturate(1.15); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== Concept B: Orbit Dots ===== */
+  .b-orbit { position: absolute; z-index: 1; border-radius: 50%; transition: width .6s ease, height .6s ease; animation: spin 26s linear infinite; }
+  .rx.idle .b-orbit { width: 208px; height: 208px; }
+  .rx.talking .b-orbit { width: 164px; height: 164px; animation-duration: 8s; }
+  .b-dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; top: -7px; left: calc(50% - 7px); }
+  .b-dot:nth-child(1) { background: #d64545; transform: rotate(0deg) translateY(0); }
+  .b-dot:nth-child(2) { background: #f5a623; }
+  .b-dot:nth-child(3) { background: #e8788a; }
+  .b-dot:nth-child(4) { background: #c98a2e; }
+  .b-orbit .b-dot:nth-child(2) { transform: rotate(90deg); transform-origin: 7px 111px; }
+  .b-orbit .b-dot:nth-child(3) { transform: rotate(180deg); transform-origin: 7px 111px; }
+  .b-orbit .b-dot:nth-child(4) { transform: rotate(270deg); transform-origin: 7px 111px; }
+  .rx.idle .b-dot { width: 12px; height: 12px; opacity: .75; }
+  .rx.talking .b-dot { width: 16px; height: 16px; opacity: 1; box-shadow: 0 0 12px currentColor; }
+
+  /* ===== Concept C: Halo Breath ===== */
+  .c-halo { position: absolute; z-index: 0; border-radius: 50%; transition: width .6s ease, height .6s ease;
+    background: radial-gradient(circle, rgba(214,69,69,.35) 0%, rgba(245,166,35,.22) 40%, rgba(255,217,77,.10) 65%, transparent 72%);
+    filter: blur(6px); animation: breathe 6s ease-in-out infinite; }
+  .rx.idle .c-halo { width: 250px; height: 250px; }
+  .rx.talking .c-halo { width: 230px; height: 230px; animation-duration: 2.6s;
+    background: radial-gradient(circle, rgba(214,69,69,.5) 0%, rgba(245,166,35,.32) 40%, rgba(232,120,138,.16) 65%, transparent 72%); }
+  .c-ring-thin { position: absolute; z-index: 1; border-radius: 50%; border: 3px solid rgba(214,69,69,.35); transition: width .6s ease, height .6s ease; }
+  .rx.idle .c-ring-thin { width: 184px; height: 184px; }
+  .rx.talking .c-ring-thin { width: 142px; height: 142px; border-color: rgba(214,69,69,.6); }
+  @keyframes breathe { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.06); opacity: 1; } }
+
+  /* ===== Concept D: Light Bar ===== */
+  .d-circle { position: absolute; z-index: 1; border-radius: 50%; border: 3px solid #e3ddd2; transition: width .6s ease, height .6s ease, border-color .6s ease; }
+  .rx.idle .d-circle { width: 184px; height: 184px; }
+  .rx.talking .d-circle { width: 142px; height: 142px; border-color: #d64545; }
+  .d-bar { position: absolute; left: 6%; right: 6%; bottom: 34px; height: 6px; border-radius: 999px; background: #e8e2d9; overflow: hidden; }
+  .d-bar-fill { position: absolute; inset: 0; border-radius: 999px;
+    background: linear-gradient(90deg, #d64545, #f5a623, #ffd94d, #e8788a, #d64545);
+    background-size: 200% 100%; transform: translateX(-101%); }
+  .rx.talking .d-bar-fill { animation: barslide 2.8s linear infinite; }
+  @keyframes barslide { 0% { transform: translateX(-101%); } 100% { transform: translateX(101%); } }
+
+  footer { max-width: 1200px; margin: 0 auto; padding: 8px 40px 64px; color: #5f6368; font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Maple Receiver — Design Concepts 🍁</h1>
+  <p>Four directions for the voice-note screen. Light theme throughout, Google-native feel with Maple personality. Toggle <b>Idle</b> / <b>Talking</b> on each to see both states. Notes on what the research changed are at the bottom.</p>
+</header>
+
+<!-- ============ CONCEPT A ============ -->
+<div class="concept">
+  <div class="concept-head"><h2>A · Aurora Flow</h2><span class="tag">Recommended</span><p>Flowing multi-color conic ring in Maple's warm palette (maple red → amber → gold → rose). Slow drift when idle, faster saturated flow when talking. Directly inspired by Gemini's pulsing gradient language — but warm, not Google RGBY.</p></div>
+  <div class="stage-wrap"><div class="stage">
+    <div class="rx idle" id="rx-a">
+      <div class="rx-left" style="position:relative; width:220px; height:260px; justify-content:center;">
+        <div class="a-ring"></div>
+        <div class="rx-avatar"><video src="maple-idle.mp4" autoplay muted loop playsinline></video></div>
+        <div class="rx-title">Maple <span class="leaf">🍁</span></div>
+        <div class="rx-sub">Ready</div>
+      </div>
+      <div class="rx-right"><div class="rx-transcript">Hey Alex! This is what the transcript looks like while Maple talks — the text gets more room as the avatar shrinks.</div></div>
+      <div class="rx-hint">concept A · Aurora Flow</div>
+    </div>
+  </div></div>
+  <div class="controls">
+    <button class="active" onclick="setState('rx-a', false, this)">Idle</button>
+    <button onclick="setState('rx-a', true, this)">Talking</button>
+    <span>Talking: ring spins faster + avatar shrinks to 128px</span>
+  </div>
+</div>
+
+<!-- ============ CONCEPT B ============ -->
+<div class="concept">
+  <div class="concept-head"><h2>B · Orbit Dots</h2><p>Four dots in Maple tones orbit the avatar — a nod to Assistant's iconic dots, recolored warm. Dots grow and glow when talking. Playful, unmistakably "assistant."</p></div>
+  <div class="stage-wrap"><div class="stage">
+    <div class="rx idle" id="rx-b">
+      <div class="rx-left" style="position:relative; width:230px; height:260px; justify-content:center;">
+        <div class="b-orbit"><div class="b-dot"></div><div class="b-dot"></div><div class="b-dot"></div><div class="b-dot"></div></div>
+        <div class="rx-avatar"><video src="maple-idle.mp4" autoplay muted loop playsinline></video></div>
+        <div class="rx-title">Maple <span class="leaf">🍁</span></div>
+        <div class="rx-sub">Ready</div>
+      </div>
+      <div class="rx-right"><div class="rx-transcript">Hey Alex! The orbiting dots speed up while Maple talks — a familiar assistant cue in Maple colors.</div></div>
+      <div class="rx-hint">concept B · Orbit Dots</div>
+    </div>
+  </div></div>
+  <div class="controls">
+    <button class="active" onclick="setState('rx-b', false, this)">Idle</button>
+    <button onclick="setState('rx-b', true, this)">Talking</button>
+    <span>Talking: dots speed up, grow, and glow</span>
+  </div>
+</div>
+
+<!-- ============ CONCEPT C ============ -->
+<div class="concept">
+  <div class="concept-head"><h2>C · Halo Breath</h2><p>Soft diffused halo behind the avatar — the most "Nest Hub ambient" of the four. Gentle breathing when idle, intensified glow when talking. Calm, blends into the room.</p></div>
+  <div class="stage-wrap"><div class="stage">
+    <div class="rx idle" id="rx-c">
+      <div class="rx-left" style="position:relative; width:270px; height:260px; justify-content:center;">
+        <div class="c-halo"></div>
+        <div class="c-ring-thin"></div>
+        <div class="rx-avatar"><video src="maple-idle.mp4" autoplay muted loop playsinline></video></div>
+        <div class="rx-title">Maple <span class="leaf">🍁</span></div>
+        <div class="rx-sub">Ready</div>
+      </div>
+      <div class="rx-right"><div class="rx-transcript">Hey Alex! The halo breathes softly behind Maple — warm light, not neon. It deepens in color while talking.</div></div>
+      <div class="rx-hint">concept C · Halo Breath</div>
+    </div>
+  </div></div>
+  <div class="controls">
+    <button class="active" onclick="setState('rx-c', false, this)">Idle</button>
+    <button onclick="setState('rx-c', true, this)">Talking</button>
+    <span>Talking: halo breathes faster and deepens</span>
+  </div>
+</div>
+
+<!-- ============ CONCEPT D ============ -->
+<div class="concept">
+  <div class="concept-head"><h2>D · Light Bar</h2><p>The most Google-native: restrained, clean, avatar in a simple circle. The personality lives in a thin multi-color light bar along the bottom (à la Pixel's Assistant bar) that flows while talking. Maximum room for text.</p></div>
+  <div class="stage-wrap"><div class="stage">
+    <div class="rx idle" id="rx-d">
+      <div class="rx-left" style="position:relative; width:210px; height:260px; justify-content:center;">
+        <div class="d-circle"></div>
+        <div class="rx-avatar"><video src="maple-idle.mp4" autoplay muted loop playsinline></video></div>
+        <div class="rx-title">Maple <span class="leaf">🍁</span></div>
+        <div class="rx-sub">Ready</div>
+      </div>
+      <div class="rx-right"><div class="rx-transcript">Hey Alex! The most understated option — the color lives in the light bar at the bottom while the layout stays calm and Google-like.</div></div>
+      <div class="d-bar"><div class="d-bar-fill"></div></div>
+      <div class="rx-hint">concept D · Light Bar</div>
+    </div>
+  </div></div>
+  <div class="controls">
+    <button class="active" onclick="setState('rx-d', false, this)">Idle</button>
+    <button onclick="setState('rx-d', true, this)">Talking</button>
+    <span>Talking: light bar flows with color, avatar ring warms up</span>
+  </div>
+</div>
+
+<footer>
+  <b>What the research changed:</b> I started with four variations of a gold spinning ring (my default pattern). Reading about Gemini's new UI — "smooth, shifting gradients" with a "heartbeat" pulse — pushed me toward <i>flowing color</i> instead of <i>spinning geometry</i> (Concept A). The Assistant "light bar" pattern gave me Concept D, which I wouldn't have drawn otherwise. Nest Hub's "ambient, blends into the room" philosophy killed my first instinct for a neon glow and produced the soft diffused halo in Concept C. All four keep your constraints: light theme, avatar left (shrinks when talking), transcript right with more room, no floating, no EQ bars, 🍁 present.
+</footer>
+
+<script>
+function setState(id, talking, btn) {
+  var el = document.getElementById(id);
+  el.classList.toggle('talking', talking);
+  el.classList.toggle('idle', !talking);
+  var btns = btn.parentElement.querySelectorAll('button');
+  btns.forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  // swap avatar video to "speaking" loop when talking
+  var v = el.querySelector('video');
+  if (v) {
+    var want = talking ? 'maple-speaking.mp4' : 'maple-idle.mp4';
+    if (v.getAttribute('src') !== want) { v.src = want; v.play().catch(function(){}); }
+  }
+  var sub = el.querySelector('.rx-sub');
+  if (sub) sub.textContent = talking ? 'Speaking…' : 'Ready';
+}
+</script>
+</body>
+</html>
