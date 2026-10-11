@@ -34,6 +34,7 @@
   .orbit-back { z-index: 0; }
   .orbit-front { z-index: 2; }
   body.is-thinking .orbit { animation-duration: 4s; }
+  body.is-spinning-up .orbit { animation-duration: 1.6s; }
   body.is-playing .orbit { animation-duration: 10s; }
   @keyframes orbit-spin { to { transform: rotate(360deg); } }
   .odot {
@@ -42,20 +43,20 @@
   }
   /* irregular angles for natural feel — not equally spaced */
   .orbit-back .odot:nth-child(1) { width: 18px; height: 18px; background: #d64545; margin: -9px 0 0 -9px;
-    transform: rotate(8deg) translateX(148px); box-shadow: 0 0 14px 3px rgba(214,69,69,.55); }
+    transform: rotate(8deg) translateX(114px); box-shadow: 0 0 14px 3px rgba(214,69,69,.55); }
   .orbit-back .odot:nth-child(2) { width: 11px; height: 11px; background: #c98a2e; margin: -5.5px 0 0 -5.5px;
-    transform: rotate(163deg) translateX(152px); box-shadow: 0 0 10px 2px rgba(201,138,46,.5); }
+    transform: rotate(163deg) translateX(117px); box-shadow: 0 0 10px 2px rgba(201,138,46,.5); }
   .orbit-back .odot:nth-child(3) { width: 13px; height: 13px; background: #e8788a; margin: -6.5px 0 0 -6.5px;
-    transform: rotate(247deg) translateX(146px); box-shadow: 0 0 12px 2px rgba(232,120,138,.5); }
+    transform: rotate(247deg) translateX(112px); box-shadow: 0 0 12px 2px rgba(232,120,138,.5); }
   .orbit-front .odot:nth-child(1) { width: 12px; height: 12px; background: #f5a623; margin: -6px 0 0 -6px;
-    transform: rotate(96deg) translateX(150px); box-shadow: 0 0 12px 3px rgba(245,166,35,.6); }
+    transform: rotate(96deg) translateX(116px); box-shadow: 0 0 12px 3px rgba(245,166,35,.6); }
   .orbit-front .odot:nth-child(2) { width: 16px; height: 16px; background: #b3271e; margin: -8px 0 0 -8px;
-    transform: rotate(311deg) translateX(149px); box-shadow: 0 0 14px 3px rgba(179,39,30,.55); }
-  body.is-playing .orbit-back .odot:nth-child(1) { transform: rotate(8deg) translateX(110px); }
-  body.is-playing .orbit-back .odot:nth-child(2) { transform: rotate(163deg) translateX(113px); }
-  body.is-playing .orbit-back .odot:nth-child(3) { transform: rotate(247deg) translateX(109px); }
-  body.is-playing .orbit-front .odot:nth-child(1) { transform: rotate(96deg) translateX(111px); }
-  body.is-playing .orbit-front .odot:nth-child(2) { transform: rotate(311deg) translateX(110px); }
+    transform: rotate(311deg) translateX(115px); box-shadow: 0 0 14px 3px rgba(179,39,30,.55); }
+  body.is-playing .orbit-back .odot:nth-child(1) { transform: rotate(8deg) translateX(86px); }
+  body.is-playing .orbit-back .odot:nth-child(2) { transform: rotate(163deg) translateX(88px); }
+  body.is-playing .orbit-back .odot:nth-child(3) { transform: rotate(247deg) translateX(85px); }
+  body.is-playing .orbit-front .odot:nth-child(1) { transform: rotate(96deg) translateX(87px); }
+  body.is-playing .orbit-front .odot:nth-child(2) { transform: rotate(311deg) translateX(86px); }
   .avatar-stage {
     position: relative;
     width: 200px; height: 200px;
@@ -163,7 +164,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v18';
+  var RECEIVER_VERSION = 'js-v19';
   var hintEl = document.getElementById('hint');
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
@@ -234,6 +235,7 @@
     document.body.classList.toggle('is-playing', !!playing);
     document.body.classList.remove('is-idle');
     document.body.classList.remove('is-thinking');
+    document.body.classList.remove('is-spinning-up');
     setAvatarMode(playing ? 'speaking' : 'idle');
     if (playing) driveHighlight(); else stopScroll();
   }
@@ -268,9 +270,15 @@
       a.src = url;
       a.onended = function () { setPlayingUI(false); };
       a.onplaying = function () {
-        // audio actually started -> switch from thinking to talking
-        if (thinkingTimeout) { clearTimeout(thinkingTimeout); thinkingTimeout = null; }
-        setPlayingUI(true);
+        // audio actually started -> spin-up burst, then settle to talking
+        if (thinkingTimeout) { clearTimeout(thinkingTimeout); }
+        document.body.classList.add('is-spinning-up');
+        document.body.classList.remove('is-thinking');
+        setAvatarMode('speaking');
+        thinkingTimeout = setTimeout(function () {
+          document.body.classList.remove('is-spinning-up');
+          setPlayingUI(true);
+        }, 2200);
       };
       var p = a.play();
       if (p && p.catch) p.catch(function () {});
@@ -298,12 +306,14 @@
       transcriptEl.scrollTop = 0;
     }
     if (d.audio_url) {
-      // thinking state: fast orbit for 1.5s, then audio starts -> talking
+      // thinking -> spin-up burst -> steady talking
       setThinkingUI();
       if (thinkingTimeout) clearTimeout(thinkingTimeout);
+      document.body.classList.add('is-spinning-up');
       thinkingTimeout = setTimeout(function () {
-        setPlayingUI(true); // fallback if onplaying doesn't fire
-      }, 4000);
+        document.body.classList.remove('is-spinning-up');
+        setPlayingUI(true);
+      }, 2200);
       playAudio(d.audio_url);
     }
   }
