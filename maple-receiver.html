@@ -149,12 +149,12 @@
       <div class="transcript" id="transcript"></div>
     </div>
   </div>
-  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v12</div>
+  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v13</div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v12';
+  var RECEIVER_VERSION = 'js-v13';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -236,8 +236,11 @@
     } catch (e) { hintEl.textContent = 'audio error: ' + e; hintEl.style.display = 'block'; }
   }
 
+  var lastMsgText = null;
   function handleMessage(d) {
     d = d || {};
+    if (d.text && d.text === lastMsgText) return; // ignore duplicates
+    lastMsgText = d.text || null;
     if (d.title) titleEl.innerHTML = escapeHtml(d.title) + ' <span class="leaf">🍁</span>';
     if (d.subtitle) subEl.textContent = d.subtitle;
     if (d.text) {
@@ -280,7 +283,7 @@
       catch (e) { try { handleMessage(event.data); } catch (x) {} }
     };
     try { mgr.start({statusText: 'Maple ready'}); } catch (e) {}
-    hintEl.textContent = NAMESPACE + ' · js-v12 (old API)';
+    hintEl.textContent = NAMESPACE + ' · js-v13 (old API)';
   } else {
     hintEl.textContent = 'cast framework not loaded';
   }
