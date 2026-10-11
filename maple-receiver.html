@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Maple Speaker</title>
-<script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+<script src="https://www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; }
@@ -149,12 +149,12 @@
       <div class="transcript" id="transcript"></div>
     </div>
   </div>
-  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v11</div>
+  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v12</div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v11';
+  var RECEIVER_VERSION = 'js-v12';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -280,7 +280,7 @@
       catch (e) { try { handleMessage(event.data); } catch (x) {} }
     };
     try { mgr.start({statusText: 'Maple ready'}); } catch (e) {}
-    hintEl.textContent = NAMESPACE + ' · js-v11 (old API)';
+    hintEl.textContent = NAMESPACE + ' · js-v12 (old API)';
   } else {
     hintEl.textContent = 'cast framework not loaded';
   }
