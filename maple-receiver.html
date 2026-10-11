@@ -149,12 +149,12 @@
       <div class="transcript" id="transcript"></div>
     </div>
   </div>
-  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v10</div>
+  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v11</div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v10';
+  var RECEIVER_VERSION = 'js-v11';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -272,52 +272,15 @@
         return { time: (Date.now() - t0) / 1000 % 25, duration: 24 };
       };
     }, 1200);
-  } else if (window.cast && window.cast.framework) {
-    var context = cast.framework.CastReceiverContext.getInstance();
-    context.addCustomMessageListener(NAMESPACE, function (event) {
-      handleMessage(event.data);
-    });
-    playerManager = context.getPlayerManager();
-    // Debug: log LOAD requests
-    playerManager.setMessageInterceptor(
-      cast.framework.messages.MessageType.LOAD,
-      function (req) {
-        var url = req.media ? req.media.contentId : 'none';
-        hintEl.textContent = 'LOAD: ' + String(url).substring(0, 80);
-        return req;
-      }
-    );
-    playerManager.addEventListener(
-      cast.framework.events.EventType.STATE_CHANGED,
-      function () {
-        var st = null;
-        try { st = playerManager.getPlayerState(); } catch (e) {}
-        setPlayingUI(st === 'PLAYING');
-      }
-    );
-    playerManager.addEventListener(
-      cast.framework.events.EventType.ERROR,
-      function (e) {
-        var msg = 'PM ERROR: ';
-        try { msg += JSON.stringify(e); } catch (x) { msg += String(e); }
-        hintEl.textContent = msg.substring(0, 120);
-      }
-    );
-    var options = new cast.framework.CastReceiverOptions();
-    options.disableIdleTimeout = true;
-    context.start(options);
-    // Notify sender that we're ready (send to each sender, retry to beat races)
-    function sendReady() {
-      try {
-        var senders = context.getSenders();
-        for (var i = 0; i < senders.length; i++) {
-          try {
-            context.sendCustomMessage(NAMESPACE, senders[i].id, {type: 'READY', version: 'js-v10'});
-          } catch (e) {}
-        }
-      } catch (e) {}
-    }
-    for (var r = 0; r < 6; r++) { setTimeout(sendReady, 1000 + r * 5000); }
+  } else if (window.cast && window.cast.receiver) {
+    var mgr = cast.receiver.CastReceiverManager.getInstance();
+    var bus = mgr.getCastMessageBus(NAMESPACE);
+    bus.onMessage = function (event) {
+      try { handleMessage(JSON.parse(event.data)); }
+      catch (e) { try { handleMessage(event.data); } catch (x) {} }
+    };
+    try { mgr.start({statusText: 'Maple ready'}); } catch (e) {}
+    hintEl.textContent = NAMESPACE + ' · js-v11 (old API)';
   } else {
     hintEl.textContent = 'cast framework not loaded';
   }
