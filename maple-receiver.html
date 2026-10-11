@@ -135,6 +135,7 @@
 </style>
 </head>
 <body class="is-idle">
+  <cast-media-player style="display:none"></cast-media-player>
   <div class="avatar-wrap">
     <div class="avatar-stage">
       <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
@@ -148,12 +149,12 @@
       <div class="transcript" id="transcript"></div>
     </div>
   </div>
-  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v6</div>
+  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v7</div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v6';
+  var RECEIVER_VERSION = 'js-v7';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -287,6 +288,15 @@
       handleMessage(event.data);
     });
     playerManager = context.getPlayerManager();
+    // Debug: log LOAD requests
+    playerManager.setMessageInterceptor(
+      cast.framework.messages.MessageType.LOAD,
+      function (req) {
+        var url = req.media ? req.media.contentId : 'none';
+        hintEl.textContent = 'LOAD: ' + String(url).substring(0, 80);
+        return req;
+      }
+    );
     playerManager.addEventListener(
       cast.framework.events.EventType.STATE_CHANGED,
       function () {
