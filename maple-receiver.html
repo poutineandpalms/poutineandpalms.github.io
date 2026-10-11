@@ -149,12 +149,12 @@
       <div class="transcript" id="transcript"></div>
     </div>
   </div>
-  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v7</div>
+  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v8</div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v7';
+  var RECEIVER_VERSION = 'js-v8';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -316,6 +316,12 @@
     var options = new cast.framework.CastReceiverOptions();
     options.disableIdleTimeout = true;
     context.start(options);
+    // Notify sender that we're ready
+    setTimeout(function () {
+      try {
+        context.sendCustomMessage(NAMESPACE, undefined, {type: 'READY', version: 'js-v8'});
+      } catch (e) {}
+    }, 1000);
   } else {
     hintEl.textContent = 'cast framework not loaded';
   }
