@@ -29,7 +29,10 @@
   .orbit {
     position: absolute; inset: 0;
     animation: orbit-spin 24s linear infinite;
+    pointer-events: none;
   }
+  .orbit-back { z-index: 0; }
+  .orbit-front { z-index: 2; }
   body.is-thinking .orbit { animation-duration: 4s; }
   body.is-playing .orbit { animation-duration: 10s; }
   @keyframes orbit-spin { to { transform: rotate(360deg); } }
@@ -37,18 +40,22 @@
     position: absolute; border-radius: 50%;
     top: 50%; left: 50%;
   }
-  /* 5 dots, varied sizes and Maple palette colors, positioned on orbit */
-  .odot:nth-child(1) { width: 18px; height: 18px; background: #d64545; margin: -9px 0 0 -9px; transform: rotate(0deg) translateX(150px) rotate(0deg); }
-  .odot:nth-child(2) { width: 12px; height: 12px; background: #f5a623; margin: -6px 0 0 -6px; transform: rotate(72deg) translateX(150px) rotate(-72deg); }
-  .odot:nth-child(3) { width: 15px; height: 15px; background: #e8788a; margin: -7.5px 0 0 -7.5px; transform: rotate(144deg) translateX(150px) rotate(-144deg); }
-  .odot:nth-child(4) { width: 10px; height: 10px; background: #c98a2e; margin: -5px 0 0 -5px; transform: rotate(216deg) translateX(150px) rotate(-216deg); }
-  .odot:nth-child(5) { width: 14px; height: 14px; background: #b3271e; margin: -7px 0 0 -7px; transform: rotate(288deg) translateX(150px) rotate(-288deg); }
-  body.is-playing .odot:nth-child(1) { transform: rotate(0deg) translateX(112px) rotate(0deg); }
-  body.is-playing .odot:nth-child(2) { transform: rotate(72deg) translateX(112px) rotate(-72deg); }
-  body.is-playing .odot:nth-child(3) { transform: rotate(144deg) translateX(112px) rotate(-144deg); }
-  body.is-playing .odot:nth-child(4) { transform: rotate(216deg) translateX(112px) rotate(-216deg); }
-  body.is-playing .odot:nth-child(5) { transform: rotate(288deg) translateX(112px) rotate(-288deg); }
-  body.is-thinking .odot { box-shadow: 0 0 10px currentColor; }
+  /* irregular angles for natural feel — not equally spaced */
+  .orbit-back .odot:nth-child(1) { width: 18px; height: 18px; background: #d64545; margin: -9px 0 0 -9px;
+    transform: rotate(8deg) translateX(148px); box-shadow: 0 0 14px 3px rgba(214,69,69,.55); }
+  .orbit-back .odot:nth-child(2) { width: 11px; height: 11px; background: #c98a2e; margin: -5.5px 0 0 -5.5px;
+    transform: rotate(163deg) translateX(152px); box-shadow: 0 0 10px 2px rgba(201,138,46,.5); }
+  .orbit-back .odot:nth-child(3) { width: 13px; height: 13px; background: #e8788a; margin: -6.5px 0 0 -6.5px;
+    transform: rotate(247deg) translateX(146px); box-shadow: 0 0 12px 2px rgba(232,120,138,.5); }
+  .orbit-front .odot:nth-child(1) { width: 12px; height: 12px; background: #f5a623; margin: -6px 0 0 -6px;
+    transform: rotate(96deg) translateX(150px); box-shadow: 0 0 12px 3px rgba(245,166,35,.6); }
+  .orbit-front .odot:nth-child(2) { width: 16px; height: 16px; background: #b3271e; margin: -8px 0 0 -8px;
+    transform: rotate(311deg) translateX(149px); box-shadow: 0 0 14px 3px rgba(179,39,30,.55); }
+  body.is-playing .orbit-back .odot:nth-child(1) { transform: rotate(8deg) translateX(110px); }
+  body.is-playing .orbit-back .odot:nth-child(2) { transform: rotate(163deg) translateX(113px); }
+  body.is-playing .orbit-back .odot:nth-child(3) { transform: rotate(247deg) translateX(109px); }
+  body.is-playing .orbit-front .odot:nth-child(1) { transform: rotate(96deg) translateX(111px); }
+  body.is-playing .orbit-front .odot:nth-child(2) { transform: rotate(311deg) translateX(110px); }
   .avatar-stage {
     position: relative;
     width: 200px; height: 200px;
@@ -133,8 +140,11 @@
 </head>
 <body class="is-idle">
   <div class="avatar-wrap" id="avatar-wrap">
-    <div class="orbit" id="orbit">
-      <div class="odot"></div><div class="odot"></div><div class="odot"></div><div class="odot"></div><div class="odot"></div>
+    <div class="orbit orbit-back" id="orbit-back">
+      <div class="odot"></div><div class="odot"></div><div class="odot"></div>
+    </div>
+    <div class="orbit orbit-front" id="orbit-front">
+      <div class="odot"></div><div class="odot"></div>
     </div>
     <div class="avatar-stage">
       <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
@@ -153,7 +163,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v17';
+  var RECEIVER_VERSION = 'js-v18';
   var hintEl = document.getElementById('hint');
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
