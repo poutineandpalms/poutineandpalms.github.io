@@ -1,26 +1,307 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Maple API Test</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maple Speaker</title>
 <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: radial-gradient(1400px 900px at 38% 45%, #2b2118 0%, #171310 55%, #0d0b09 100%);
+    color: #f5efe6;
+    display: flex; align-items: center; justify-content: center;
+    gap: 96px;
+    overflow: hidden;
+    padding: 0 80px;
+  }
+  /* ---- avatar with maple AI ring ---- */
+  .avatar-wrap {
+    position: relative;
+    width: 400px; height: 400px;
+    flex: 0 0 auto;
+    animation: float 5s ease-in-out infinite;
+  }
+  .avatar-wrap::before {
+    /* spinning maple-hue conic ring */
+    content: "";
+    position: absolute; inset: -20px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+      #b3271e, #e8933c, #f5d76e, #e8933c, #b3271e,
+      #7e1d16, #e8933c, #b3271e);
+    animation: spin 14s linear infinite;
+    filter: blur(3px) saturate(1.15);
+  }
+  .avatar-wrap::after {
+    /* breathing halo — the "thinking" pulse */
+    content: "";
+    position: absolute; inset: -20px;
+    border-radius: 50%;
+    animation: breathe 2.8s ease-in-out infinite;
+  }
+  /* talking state: ring goes more active */
+  body.is-playing .avatar-wrap::before { animation-duration: 5s; }
+  body.is-playing .avatar-wrap::after { animation: breathe-fast 1.3s ease-in-out infinite; }
+  .avatar-stage {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #241d16;
+    z-index: 1;
+  }
+  .avatar-stage video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .avatar-stage video.active { opacity: 1; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 0 55px 10px rgba(227, 120, 40, 0.30); }
+    50%      { box-shadow: 0 0 110px 26px rgba(227, 120, 40, 0.55); }
+  }
+  @keyframes breathe-fast {
+    0%, 100% { box-shadow: 0 0 70px 14px rgba(227, 120, 40, 0.45); }
+    50%      { box-shadow: 0 0 150px 40px rgba(245, 180, 60, 0.85); }
+  }
+  /* ---- text block ---- */
+  .meta {
+    flex: 1 1 auto;
+    max-width: 640px;
+    text-align: left;
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+  h1 {
+    font-size: 92px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    line-height: 1;
+    white-space: nowrap;
+    transition: font-size 0.8s ease, opacity 0.8s ease;
+  }
+  h1 .leaf { color: #e8933c; }
+  body.is-playing h1 {
+    font-size: 40px;
+    opacity: 0.85;
+  }
+  .sub {
+    margin-top: 14px;
+    font-size: 26px;
+    color: #b9a88f;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+  }
+  /* ---- transcript ---- */
+  .transcript-wrap {
+    margin-top: 26px;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(16px);
+    overflow: hidden;
+    transition: max-height 0.9s ease, opacity 0.9s ease, transform 0.9s ease;
+  }
+  body.is-playing .transcript-wrap {
+    max-height: 420px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .transcript {
+    max-height: 420px;
+    overflow-y: auto;
+    font-size: 33px;
+    line-height: 1.55;
+    color: #efe7d8;
+    padding-right: 18px;
+    scrollbar-width: none;
+  }
+  .transcript::-webkit-scrollbar { display: none; }
+  .hint {
+    position: absolute; bottom: 26px; left: 0; right: 0;
+    text-align: center;
+    font-size: 18px; color: #6f6252; letter-spacing: 2px;
+  }
+</style>
 </head>
-<body style="background:#1a1a1a;color:#fff;font-family:sans-serif;margin:0;height:100vh;display:flex;align-items:center;justify-content:center">
-<h1>API TEST v1</h1>
+<body class="is-idle">
+  <div class="avatar-wrap">
+    <div class="avatar-stage">
+      <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
+      <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
+    </div>
+  </div>
+  <div class="meta">
+    <h1 id="title">Maple <span class="leaf">🍁</span></h1>
+    <div class="sub" id="subtitle">Ready</div>
+    <div class="transcript-wrap" id="transcript-wrap">
+      <div class="transcript" id="transcript"></div>
+    </div>
+  </div>
+  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v4</div>
+  <audio id="fallback-audio" preload="none"></audio>
 <script>
-try {
-  var ctx = cast.framework.CastReceiverContext.getInstance();
-  ctx.addCustomMessageListener('urn:x-cast:com.maple.speaker', function (e) {
-    document.querySelector('h1').textContent = 'MSG OK';
-  });
-  var pm = ctx.getPlayerManager();
-  pm.addEventListener(cast.framework.events.EventType.STATE_CHANGED, function () {
-    var st = null;
-    try { st = pm.getPlayerState(); } catch (e) {}
-    document.querySelector('h1').textContent = 'STATE: ' + st;
-  });
-  var options = new cast.framework.CastReceiverOptions();
-  options.disableIdleTimeout = true;
-  ctx.start(options);
-  document.querySelector('h1').textContent = 'API TEST v1 - READY';
-} catch (err) {
-  document.querySelector('h1').textContent = 'INIT ERROR: ' + err.message;
-}
-</script></body></html>
+(function () {
+  var NAMESPACE = 'urn:x-cast:com.maple.speaker';
+  var RECEIVER_VERSION = 'js-v5';
+  var hintEl = document.getElementById('hint');
+  // runtime version stamp: proves THIS script executed (not a cached copy)
+  hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
+  var titleEl = document.getElementById('title');
+  var subEl = document.getElementById('subtitle');
+  var transcriptEl = document.getElementById('transcript');
+  var vidIdle = document.getElementById('vid-idle');
+  var vidSpeaking = document.getElementById('vid-speaking');
+  var playerManager = null;
+  var scrollRaf = null;
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function setAvatarMode(mode) {
+    var idle = mode !== 'speaking';
+    vidIdle.classList.toggle('active', idle);
+    vidSpeaking.classList.toggle('active', !idle);
+    var show = idle ? vidIdle : vidSpeaking;
+    var hide = idle ? vidSpeaking : vidIdle;
+    if (show.paused) { var p = show.play(); if (p && p.catch) p.catch(function () {}); }
+    hide.pause();
+  }
+
+  function stopScroll() {
+    if (scrollRaf) { cancelAnimationFrame(scrollRaf); scrollRaf = null; }
+  }
+
+  function getPosition() {
+    // returns {time, duration} in seconds, or null
+    try {
+      if (playerManager) {
+        var t = playerManager.getCurrentTimeSec();
+        var d = playerManager.getDurationSec();
+        if (isFinite(t) && isFinite(d) && d > 0) return { time: t, duration: d };
+      }
+    } catch (e) {}
+    var a = document.getElementById('fallback-audio');
+    if (a && isFinite(a.duration) && a.duration > 0) {
+      return { time: a.currentTime || 0, duration: a.duration };
+    }
+    return null;
+  }
+
+  function driveScroll() {
+    stopScroll();
+    var step = function () {
+      var pos = getPosition();
+      if (pos) {
+        var max = transcriptEl.scrollHeight - transcriptEl.clientHeight;
+        if (max > 0) {
+          var p = Math.min(1, Math.max(0, pos.time / pos.duration));
+          transcriptEl.scrollTop = p * max;
+        }
+      }
+      scrollRaf = requestAnimationFrame(step);
+    };
+    step();
+  }
+
+  function setPlayingUI(playing) {
+    document.body.classList.toggle('is-playing', !!playing);
+    document.body.classList.remove('is-idle');
+    setAvatarMode(playing ? 'speaking' : 'idle');
+    if (playing) driveScroll(); else stopScroll();
+  }
+
+  function playAudio(url) {
+    if (window.cast && window.cast.framework && playerManager) {
+      try {
+        var req = new cast.framework.messages.LoadRequestData();
+        req.media = new cast.framework.messages.MediaInformation();
+        req.media.contentId = url;
+        req.media.contentType = 'audio/mp3';
+        req.media.streamType = cast.framework.messages.StreamType.BUFFERED;
+        playerManager.load(req);
+        return;
+      } catch (e) { /* fall through to audio element */ }
+    }
+    var a = document.getElementById('fallback-audio');
+    a.src = url;
+    a.onended = function () { setPlayingUI(false); };
+    var p = a.play();
+    if (p && p.catch) p.catch(function () {});
+    // fallback element drives the scroll via timeupdate
+    a.ontimeupdate = function () { /* handled by rAF loop reading a.currentTime */ };
+  }
+
+  function handleMessage(d) {
+    d = d || {};
+    if (d.title) titleEl.innerHTML = escapeHtml(d.title) + ' <span class="leaf">🍁</span>';
+    if (d.subtitle) subEl.textContent = d.subtitle;
+    if (d.text) {
+      transcriptEl.textContent = d.text;
+      transcriptEl.scrollTop = 0;
+    }
+    hintEl.style.display = 'none';
+    if (d.audio_url) {
+      playAudio(d.audio_url);
+      setPlayingUI(true);
+    }
+  }
+
+  var isDemo = location.search.indexOf('demo=1') >= 0;
+
+  if (isDemo) {
+    hintEl.textContent = 'demo preview — no Cast framework';
+    setTimeout(function () {
+      handleMessage({
+        title: 'Maple',
+        subtitle: 'Morning briefing',
+        text: 'Good morning, Alex! Here is what is happening today. ' +
+          'You have a focus block until ten, then the product review at eleven. ' +
+          'The kitchen speaker demo went great yesterday, and the custom receiver ' +
+          'is now live on every screen in the house. ' +
+          'Weather is sunny with a high of twenty-eight degrees. Have a great day!'
+      });
+      setPlayingUI(true);
+      // demo: fake a 24s playback for the scroll driver
+      var t0 = Date.now();
+      getPosition = function () {
+        return { time: (Date.now() - t0) / 1000 % 25, duration: 24 };
+      };
+    }, 1200);
+  } else if (window.cast && window.cast.framework) {
+    var context = cast.framework.CastReceiverContext.getInstance();
+    context.addCustomMessageListener(NAMESPACE, function (event) {
+      handleMessage(event.data);
+    });
+    playerManager = context.getPlayerManager();
+    playerManager.addEventListener(
+      cast.framework.events.EventType.STATE_CHANGED,
+      function () {
+        var st = null;
+        try { st = playerManager.getPlayerState(); } catch (e) {}
+        setPlayingUI(st === 'PLAYING');
+      }
+    );
+    var options = new cast.framework.CastReceiverOptions();
+    options.disableIdleTimeout = true;
+    context.start(options);
+  } else {
+    hintEl.textContent = 'cast framework not loaded';
+  }
+})();
+</script>
+</body>
+</html>
