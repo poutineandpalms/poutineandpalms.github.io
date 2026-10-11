@@ -154,7 +154,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v14';
+  var RECEIVER_VERSION = 'js-v15';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -283,7 +283,7 @@
       catch (e) { try { handleMessage(event.data); } catch (x) {} }
     };
     try { mgr.start({statusText: 'Maple'}); } catch (e) {}
-    hintEl.textContent = NAMESPACE + ' · js-v14';
+    hintEl.style.display = 'none'; // clean loading state, no placeholder text
     try {
       var appData = mgr.getApplicationData();
       if (appData) {
