@@ -148,12 +148,12 @@
       <div class="transcript" id="transcript"></div>
     </div>
   </div>
-  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v4</div>
+  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v6</div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v5';
+  var RECEIVER_VERSION = 'js-v6';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -293,6 +293,14 @@
         var st = null;
         try { st = playerManager.getPlayerState(); } catch (e) {}
         setPlayingUI(st === 'PLAYING');
+      }
+    );
+    playerManager.addEventListener(
+      cast.framework.events.EventType.ERROR,
+      function (e) {
+        var msg = 'PM ERROR: ';
+        try { msg += JSON.stringify(e); } catch (x) { msg += String(e); }
+        hintEl.textContent = msg.substring(0, 120);
       }
     );
     var options = new cast.framework.CastReceiverOptions();
