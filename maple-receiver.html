@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Maple Video Test</title>
+<html><head><meta charset="utf-8"><title>Maple API Test</title>
 <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 </head>
-<body style="background:#1a1a1a;color:#fff;font-family:sans-serif;margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center">
-<h1>VIDEO TEST v1</h1>
-<video src="maple-idle.mp4" muted loop playsinline autoplay style="width:300px;height:300px;border-radius:50%;object-fit:cover"></video>
+<body style="background:#1a1a1a;color:#fff;font-family:sans-serif;margin:0;height:100vh;display:flex;align-items:center;justify-content:center">
+<h1>API TEST v1</h1>
 <script>
 try {
   var ctx = cast.framework.CastReceiverContext.getInstance();
   ctx.addCustomMessageListener('urn:x-cast:com.maple.speaker', function (e) {
     document.querySelector('h1').textContent = 'MSG OK';
   });
-  ctx.start();
-  document.querySelector('h1').textContent = 'VIDEO TEST v1 - READY';
+  var pm = ctx.getPlayerManager();
+  pm.addEventListener(cast.framework.events.EventType.STATE_CHANGED, function () {
+    var st = null;
+    try { st = pm.getPlayerState(); } catch (e) {}
+    document.querySelector('h1').textContent = 'STATE: ' + st;
+  });
+  var options = new cast.framework.CastReceiverOptions();
+  options.disableIdleTimeout = true;
+  ctx.start(options);
+  document.querySelector('h1').textContent = 'API TEST v1 - READY';
 } catch (err) {
   document.querySelector('h1').textContent = 'INIT ERROR: ' + err.message;
 }
