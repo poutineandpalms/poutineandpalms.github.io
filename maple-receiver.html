@@ -26,20 +26,21 @@
     transition: width .6s ease, height .6s ease;
   }
   body.is-playing .avatar-wrap { width: 240px; height: 240px; }
-  .orbit {
+  .orbit-layer {
     position: absolute; inset: 0;
-    animation: orbit-spin 24s linear infinite;
     pointer-events: none;
   }
   .orbit-back { z-index: 0; }
   .orbit-front { z-index: 2; }
-  body.is-thinking .orbit { animation-duration: 4s; }
-  body.is-spinning-up .orbit { animation-duration: 1.6s; }
-  body.is-playing .orbit { animation-duration: 10s; }
-  @keyframes orbit-spin { to { transform: rotate(360deg); } }
+  .spinner { position: absolute; inset: 0; }
   .odot {
     position: absolute; border-radius: 50%;
     top: 50%; left: 50%;
+    width: var(--s); height: var(--s);
+    margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+    background: var(--c);
+    transform: rotate(var(--a)) translateX(var(--r));
+    box-shadow: 0 0 14px 3px var(--glow);
   }
   /* irregular angles for natural feel — not equally spaced */
   .orbit-back .odot:nth-child(1) { width: 18px; height: 18px; background: #d64545; margin: -9px 0 0 -9px;
@@ -141,11 +142,14 @@
 </head>
 <body class="is-idle">
   <div class="avatar-wrap" id="avatar-wrap">
-    <div class="orbit orbit-back" id="orbit-back">
-      <div class="odot"></div><div class="odot"></div><div class="odot"></div>
+    <div class="orbit-layer orbit-back" id="layer-back">
+      <div class="spinner" data-mult="0.88"><div class="odot" style="--a:8deg; --r:114px; --s:18px; --c:#d64545; --glow:rgba(214,69,69,.55)"></div></div>
+      <div class="spinner" data-mult="1.12"><div class="odot" style="--a:163deg; --r:117px; --s:11px; --c:#c98a2e; --glow:rgba(201,138,46,.5)"></div></div>
+      <div class="spinner" data-mult="0.95"><div class="odot" style="--a:247deg; --r:112px; --s:13px; --c:#e8788a; --glow:rgba(232,120,138,.5)"></div></div>
     </div>
-    <div class="orbit orbit-front" id="orbit-front">
-      <div class="odot"></div><div class="odot"></div>
+    <div class="orbit-layer orbit-front" id="layer-front">
+      <div class="spinner" data-mult="1.05"><div class="odot" style="--a:96deg; --r:116px; --s:12px; --c:#f5a623; --glow:rgba(245,166,35,.6)"></div></div>
+      <div class="spinner" data-mult="0.92"><div class="odot" style="--a:311deg; --r:115px; --s:16px; --c:#b3271e; --glow:rgba(179,39,30,.55)"></div></div>
     </div>
     <div class="avatar-stage">
       <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
@@ -164,7 +168,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v19';
+  var RECEIVER_VERSION = 'js-v20';
   var hintEl = document.getElementById('hint');
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
@@ -174,6 +178,33 @@
   var scrollRaf = null;
   var lineEls = [];
   var thinkingTimeout = null;
+  // ---- orbit driver: eased angular velocity, per-dot speed multipliers ----
+  var spinners = [];
+  var orbitVel = 15; // deg/sec, current (eased)
+  var orbitTarget = 15; // deg/sec, target
+  var SPEEDS = { idle: 15, thinking: 55, spinup: 110, talking: 32 };
+  function initOrbit() {
+    var els = document.querySelectorAll('.spinner');
+    for (var i = 0; i < els.length; i++) {
+      spinners.push({ el: els[i], mult: parseFloat(els[i].getAttribute('data-mult')) || 1, angle: 0 });
+    }
+    var last = performance.now();
+    var tick = function (now) {
+      var dt = Math.min(0.05, (now - last) / 1000); last = now;
+      // ease velocity toward target (smooth spin-up/down)
+      orbitVel += (orbitTarget - orbitVel) * 0.04;
+      for (var j = 0; j < spinners.length; j++) {
+        var s = spinners[j];
+        s.angle = (s.angle + orbitVel * s.mult * dt) % 360;
+        s.el.style.transform = 'rotate(' + s.angle + 'deg)';
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  function setOrbitState(state) {
+    orbitTarget = SPEEDS[state] || SPEEDS.idle;
+  }
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -232,6 +263,7 @@
   }
 
   function setPlayingUI(playing) {
+    setOrbitState(playing ? 'talking' : 'idle');
     document.body.classList.toggle('is-playing', !!playing);
     document.body.classList.remove('is-idle');
     document.body.classList.remove('is-thinking');
@@ -241,6 +273,7 @@
   }
 
   function setThinkingUI() {
+    setOrbitState('thinking');
     document.body.classList.add('is-thinking');
     document.body.classList.remove('is-idle');
     setAvatarMode('speaking');
@@ -273,6 +306,7 @@
         // audio actually started -> spin-up burst, then settle to talking
         if (thinkingTimeout) { clearTimeout(thinkingTimeout); }
         document.body.classList.add('is-spinning-up');
+      setOrbitState('spinup');
         document.body.classList.remove('is-thinking');
         setAvatarMode('speaking');
         thinkingTimeout = setTimeout(function () {
@@ -310,13 +344,17 @@
       setThinkingUI();
       if (thinkingTimeout) clearTimeout(thinkingTimeout);
       document.body.classList.add('is-spinning-up');
+      setOrbitState('spinup');
       thinkingTimeout = setTimeout(function () {
         document.body.classList.remove('is-spinning-up');
-        setPlayingUI(true);
+        setPlayingUI(true); // setPlayingUI sets talking speed
       }, 2200);
       playAudio(d.audio_url);
     }
   }
+
+  initOrbit();
+  setOrbitState('idle');
 
   var isDemo = location.search.indexOf('demo=1') >= 0;
   if (isDemo) {
