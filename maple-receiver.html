@@ -135,7 +135,7 @@
 </style>
 </head>
 <body class="is-idle">
-  <cast-media-player style="display:none"></cast-media-player>
+  <cast-media-player style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0"></cast-media-player>
   <div class="avatar-wrap">
     <div class="avatar-stage">
       <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
@@ -149,12 +149,12 @@
       <div class="transcript" id="transcript"></div>
     </div>
   </div>
-  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v8</div>
+  <div class="hint" id="hint">urn:x-cast:com.maple.speaker · html-v9</div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v8';
+  var RECEIVER_VERSION = 'js-v9';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -316,12 +316,18 @@
     var options = new cast.framework.CastReceiverOptions();
     options.disableIdleTimeout = true;
     context.start(options);
-    // Notify sender that we're ready
-    setTimeout(function () {
+    // Notify sender that we're ready (send to each sender, retry to beat races)
+    function sendReady() {
       try {
-        context.sendCustomMessage(NAMESPACE, undefined, {type: 'READY', version: 'js-v8'});
+        var senders = context.getSenders();
+        for (var i = 0; i < senders.length; i++) {
+          try {
+            context.sendCustomMessage(NAMESPACE, senders[i].id, {type: 'READY', version: 'js-v9'});
+          } catch (e) {}
+        }
       } catch (e) {}
-    }, 1000);
+    }
+    for (var r = 0; r < 6; r++) { setTimeout(sendReady, 1000 + r * 5000); }
   } else {
     hintEl.textContent = 'cast framework not loaded';
   }
