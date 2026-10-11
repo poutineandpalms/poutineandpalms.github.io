@@ -154,7 +154,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v13';
+  var RECEIVER_VERSION = 'js-v14';
   var hintEl = document.getElementById('hint');
   // runtime version stamp: proves THIS script executed (not a cached copy)
   hintEl.textContent = NAMESPACE + ' · ' + RECEIVER_VERSION;
@@ -282,8 +282,16 @@
       try { handleMessage(JSON.parse(event.data)); }
       catch (e) { try { handleMessage(event.data); } catch (x) {} }
     };
-    try { mgr.start({statusText: 'Maple ready'}); } catch (e) {}
-    hintEl.textContent = NAMESPACE + ' · js-v13 (old API)';
+    try { mgr.start({statusText: 'Maple'}); } catch (e) {}
+    hintEl.textContent = NAMESPACE + ' · js-v14';
+    try {
+      var appData = mgr.getApplicationData();
+      if (appData) {
+        var d = appData;
+        if (typeof d === 'string') { try { d = JSON.parse(d); } catch (e) {} }
+        if (d && (d.text || d.title || d.audio_url)) handleMessage(d);
+      }
+    } catch (e) {}
   } else {
     hintEl.textContent = 'cast framework not loaded';
   }
