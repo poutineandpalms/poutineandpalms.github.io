@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dot color test</title>
+<style>
+body { background: #faf9f7; padding: 40px; font-family: sans-serif; }
+.dot { width: 40px; height: 40px; border-radius: 50%; display: inline-block; margin: 10px; }
+</style></head><body>
+<h2>Static color test (no JS, no CSS vars)</h2>
+<div class="dot" style="background:#d64545"></div>
+<div class="dot" style="background:#ffb300"></div>
+<div class="dot" style="background:#a91e14"></div>
+<div class="dot" style="background:#f5a623"></div>
+<div class="dot" style="background:#e8830c"></div>
+<div class="dot" style="background:#c62828"></div>
+<h2 style="margin-top:30px">CSS var test</h2>
+<div class="dot" style="--c:#d64545; background:var(--c)"></div>
+<div class="dot" style="--c:#ffb300; background:var(--c)"></div>
+<div class="dot" style="--c:#a91e14; background:var(--c)"></div>
+<div class="dot" style="--c:#f5a623; background:var(--c)"></div>
+<div class="dot" style="--c:#e8830c; background:var(--c)"></div>
+<div class="dot" style="--c:#c62828; background:var(--c)"></div>
+<p>If you see 6 colored dots in each row (red, gold, dark red, amber, orange, red), CSS vars work.</p>
+</body></html>
