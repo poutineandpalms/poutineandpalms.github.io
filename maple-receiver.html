@@ -10,77 +10,93 @@
   html, body { height: 100%; }
   body {
     font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: radial-gradient(1200px 800px at 50% 30%, #2b2118 0%, #171310 55%, #0d0b09 100%);
+    background: radial-gradient(1400px 900px at 38% 45%, #2b2118 0%, #171310 55%, #0d0b09 100%);
     color: #f5efe6;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
+    gap: 96px;
     overflow: hidden;
+    padding: 0 80px;
   }
+  /* ---- avatar with maple AI ring ---- */
   .avatar-wrap {
     position: relative;
-    width: 340px; height: 340px;
-    animation: float 4.5s ease-in-out infinite;
+    width: 400px; height: 400px;
+    flex: 0 0 auto;
+    animation: float 5s ease-in-out infinite;
   }
   .avatar-wrap::before {
+    /* spinning maple-hue conic ring */
     content: "";
-    position: absolute; inset: -18px;
+    position: absolute; inset: -20px;
     border-radius: 50%;
-    background: conic-gradient(from 0deg, #e8933c, #f5d76e, #e8933c, #c96a1e, #e8933c);
-    animation: spin 9s linear infinite;
-    filter: blur(2px);
-    opacity: 0.9;
+    background: conic-gradient(from 0deg,
+      #b3271e, #e8933c, #f5d76e, #e8933c, #b3271e,
+      #7e1d16, #e8933c, #b3271e);
+    animation: spin 14s linear infinite;
+    filter: blur(3px) saturate(1.15);
   }
   .avatar-wrap::after {
+    /* breathing halo — the "thinking" pulse */
     content: "";
-    position: absolute; inset: -18px;
+    position: absolute; inset: -20px;
     border-radius: 50%;
-    box-shadow: 0 0 90px 18px rgba(232, 147, 60, 0.35);
-    animation: glow 3s ease-in-out infinite;
+    animation: breathe 2.8s ease-in-out infinite;
   }
-  .avatar-wrap img {
-    position: relative;
-    width: 340px; height: 340px;
+  .avatar-stage {
+    position: absolute; inset: 0;
     border-radius: 50%;
-    object-fit: cover;
+    overflow: hidden;
     background: #241d16;
     z-index: 1;
   }
+  .avatar-stage video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .avatar-stage video.active { opacity: 1; }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-14px); }
+    50%      { transform: translateY(-12px); }
   }
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
-  @keyframes glow {
-    0%, 100% { opacity: 0.55; }
-    50%      { opacity: 1; }
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 0 55px 10px rgba(227, 120, 40, 0.30); }
+    50%      { box-shadow: 0 0 110px 26px rgba(227, 120, 40, 0.55); }
   }
+  /* ---- text block ---- */
+  .meta { flex: 0 1 auto; text-align: left; }
   h1 {
-    margin-top: 44px;
-    font-size: 64px;
-    font-weight: 700;
+    font-size: 118px;
+    font-weight: 800;
     letter-spacing: 1px;
+    line-height: 1;
+    white-space: nowrap;
   }
   h1 .leaf { color: #e8933c; }
   .sub {
-    margin-top: 10px;
-    font-size: 26px;
+    margin-top: 18px;
+    font-size: 30px;
     color: #b9a88f;
-    letter-spacing: 4px;
+    letter-spacing: 6px;
     text-transform: uppercase;
   }
   .eq {
-    margin-top: 34px;
-    display: flex; align-items: flex-end; gap: 10px;
-    height: 56px;
+    margin-top: 40px;
+    display: flex; align-items: flex-end; gap: 12px;
+    height: 64px;
   }
   .eq span {
-    width: 12px;
-    border-radius: 6px;
-    background: linear-gradient(to top, #e8933c, #f5d76e);
+    width: 14px;
+    border-radius: 7px;
+    background: linear-gradient(to top, #b3271e, #e8933c, #f5d76e);
     animation: bounce 1.1s ease-in-out infinite;
     animation-play-state: paused;
-    transform: scaleY(0.25);
+    transform: scaleY(0.22);
   }
   body.is-playing .eq span { animation-play-state: running; }
   .eq span:nth-child(1) { height: 40%; animation-delay: 0s; }
@@ -89,22 +105,28 @@
   .eq span:nth-child(4) { height: 65%; animation-delay: 0.45s; }
   .eq span:nth-child(5) { height: 45%; animation-delay: 0.6s; }
   @keyframes bounce {
-    0%, 100% { transform: scaleY(0.35); }
+    0%, 100% { transform: scaleY(0.3); }
     50%      { transform: scaleY(1); }
   }
   .hint {
-    position: absolute; bottom: 26px;
+    position: absolute; bottom: 26px; left: 0; right: 0;
+    text-align: center;
     font-size: 18px; color: #6f6252; letter-spacing: 2px;
   }
 </style>
 </head>
 <body class="is-idle">
   <div class="avatar-wrap">
-    <img id="avatar" src="maple.webp" alt="Maple">
+    <div class="avatar-stage">
+      <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
+      <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
+    </div>
   </div>
-  <h1 id="title">Maple <span class="leaf">🍁</span></h1>
-  <div class="sub" id="subtitle">Ready</div>
-  <div class="eq" id="eq"><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="meta">
+    <h1 id="title">Maple <span class="leaf">🍁</span></h1>
+    <div class="sub" id="subtitle">Ready</div>
+    <div class="eq" id="eq"><span></span><span></span><span></span><span></span><span></span></div>
+  </div>
   <div class="hint" id="hint">urn:x-cast:com.maple.speaker</div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
@@ -112,8 +134,9 @@
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
-  var avatarEl = document.getElementById('avatar');
   var hintEl = document.getElementById('hint');
+  var vidIdle = document.getElementById('vid-idle');
+  var vidSpeaking = document.getElementById('vid-speaking');
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -121,9 +144,21 @@
     });
   }
 
+  function setAvatarMode(mode) {
+    // mode: 'idle' | 'speaking' — crossfade between the two loops
+    var idle = mode !== 'speaking';
+    vidIdle.classList.toggle('active', idle);
+    vidSpeaking.classList.toggle('active', !idle);
+    var show = idle ? vidIdle : vidSpeaking;
+    var hide = idle ? vidSpeaking : vidIdle;
+    if (show.paused) { var p = show.play(); if (p && p.catch) p.catch(function () {}); }
+    hide.pause();
+  }
+
   function setPlayingUI(playing) {
     document.body.classList.toggle('is-playing', !!playing);
     document.body.classList.remove('is-idle');
+    setAvatarMode(playing ? 'speaking' : 'idle');
   }
 
   function playAudio(url) {
@@ -149,7 +184,6 @@
     d = d || {};
     if (d.title) titleEl.innerHTML = escapeHtml(d.title) + ' <span class="leaf">🍁</span>';
     if (d.subtitle) subEl.textContent = d.subtitle;
-    if (d.image) avatarEl.src = d.image;
     hintEl.style.display = 'none';
     if (d.audio_url) {
       playAudio(d.audio_url);
@@ -160,12 +194,11 @@
   var isDemo = location.search.indexOf('demo=1') >= 0;
 
   if (isDemo) {
-    // Desktop preview: no Cast framework needed.
     hintEl.textContent = 'demo preview — no Cast framework';
     setTimeout(function () {
       handleMessage({ title: 'Maple', subtitle: 'Demo preview' });
       setPlayingUI(true);
-    }, 900);
+    }, 1200);
   } else if (window.cast && window.cast.framework) {
     var context = cast.framework.CastReceiverContext.getInstance();
     context.addCustomMessageListener(NAMESPACE, function (event) {
