@@ -408,6 +408,10 @@
         text: 'Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.'
         // no audio_url: we simulate playback below
       });
+      // manually enter thinking state (normally done by handleMessage when audio_url present)
+      setThinkingUI();
+      document.body.classList.add('is-spinning-up');
+      setOrbitState('spinup');
       // simulate thinking (1.5s) then audio starting
       setTimeout(function () {
         document.body.classList.remove('is-spinning-up');
