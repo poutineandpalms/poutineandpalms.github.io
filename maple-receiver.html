@@ -231,7 +231,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v55';
+  var RECEIVER_VERSION = 'js-v56';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -341,7 +341,8 @@
     // Title moves via CSS transition; align its left with meta content
     var titleEl = document.getElementById('title');
     requestAnimationFrame(function () {
-      titleEl.style.left = meta.offsetLeft + 'px';
+      // getBoundingClientRect is viewport-relative, matching absolute positioning
+      titleEl.style.left = meta.getBoundingClientRect().left + 'px';
     });
     var r2 = wrap.getBoundingClientRect();
     var dx = r1.left - r2.left, dy = r1.top - r2.top;
