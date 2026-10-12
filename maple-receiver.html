@@ -124,12 +124,25 @@
     max-width: 700px;
     transition: max-width 0.6s ease;
   }
-  body.is-playing .meta {
+  .meta {
+    flex: 1 1 auto;
     max-width: 780px;
-  }
     text-align: left;
-    display: flex; flex-direction: column;
+    display: none;
+    flex-direction: column;
     min-height: 0;
+    opacity: 0;
+    transform: translateX(60px);
+    pointer-events: none;
+  }
+  body.is-playing .meta {
+    display: flex;
+    max-width: 780px;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    padding-top: 150px;
+    transition: opacity .8s ease 1.4s, transform .9s cubic-bezier(.22,.8,.3,1) 1.4s;
   }
   h1 {
     margin-top: 24px;
@@ -223,7 +236,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v47';
+  var RECEIVER_VERSION = 'js-v48';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -339,17 +352,17 @@
     wrap.style.transition = 'none';
     wrap.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
     wrap.style.transformOrigin = 'center';
-    var tdx = t1.left + t1.width/2 - (t2.left + t2.width/2);
-    var tdy = t1.top + t1.height/2 - (t2.top + t2.height/2);
-    var tsx = t1.width / t2.width;
+    var tdx = t2.left - t1.left;
+    var tdy = t2.top - t1.top;
+    var tsx = t2.width / t1.width;
     splashTitle.style.transition = 'none';
-    splashTitle.style.transform = 'translate(-50%, 0) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')';
-    splashTitle.style.transformOrigin = 'center';
+    splashTitle.style.transform = 'translateX(-50%)';
     void wrap.offsetHeight;
     wrap.style.transition = 'transform 1.35s ease-in-out';
     splashTitle.style.transition = 'transform 1.35s ease-in-out, opacity .3s ease 1.1s';
     wrap.style.transform = 'translate(0,0) scale(1,1)';
-    splashTitle.style.transform = 'translate(-50%, 0) translate(0,0) scale(1)';
+    splashTitle.style.transform = 'translateX(-50%) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')';
+    splashTitle.style.transformOrigin = 'top left';
     splashTitle.style.opacity = '0';
     setTimeout(function () {
       wrap.style.transform = ''; wrap.style.transition = '';
