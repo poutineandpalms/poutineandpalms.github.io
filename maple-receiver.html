@@ -220,8 +220,8 @@
       <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
     </div>
   </div>
-  <div class="meta">Maple <span class="leaf">🍁</span></h1>
-    <div class="sub" id="subtitle">Ready</div>
+  <div class="meta">
+    <div class="sub" id="subtitle"></div>
     <div class="transcript-wrap" id="transcript-wrap">
       <div class="transcript" id="transcript"></div>
     </div>
@@ -232,7 +232,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v53';
+  var RECEIVER_VERSION = 'js-v54';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -482,9 +482,8 @@
       flipToPlaying();
       setThinkingUI();
       document.body.classList.remove('is-spinning-up');
-      // Build transcript lines (normally done in setPlayingUI)
-      buildVisualLines('Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.');
-      transcriptEl.scrollTop = 0;
+      // Store text; lines built in setPlayingUI when layout is ready (correct width)
+      pendingText = 'Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.';
       // Simulate audio starting after 1.5s thinking
       setTimeout(function () {
         setPlayingUI(true);
