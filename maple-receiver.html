@@ -15,40 +15,54 @@
     display: flex; align-items: center; justify-content: center;
     gap: 32px;
     overflow: hidden;
-    padding: 0 32px;
-    transition: padding 0.8s ease, gap 0.8s ease;
+    padding: 0 32px 0 24px;
+    justify-content: flex-start;
+    transition: padding 0.6s ease, gap 0.6s ease;
   }
   body.is-playing {
-    justify-content: flex-end;
-    padding: 0 32px 0 12px;
+    padding-left: 12px;
     gap: 24px;
   }
   /* ---- avatar with orbit dots ---- */
   .avatar-wrap {
-    position: absolute;
-    width: 380px; height: 380px;
-    display: flex; align-items: center; justify-content: center;
-    top: 54%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    transition: width .9s cubic-bezier(.22,.8,.3,1), height .9s cubic-bezier(.22,.8,.3,1),
-                top .9s cubic-bezier(.22,.8,.3,1), left .9s cubic-bezier(.22,.8,.3,1),
-                transform .9s cubic-bezier(.22,.8,.3,1);
-  }
-  body.is-playing .avatar-wrap {
+    position: relative;
     width: 480px; height: 480px;
-    top: 50%;
-    left: 12px;
-    transform: translateY(-50%);
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    transition: width .6s ease, height .6s ease;
+  }
+  body.is-playing .avatar-wrap { width: 480px; height: 480px; }
+  /* Splash (idle): centered avatar, title above, meta hidden */
+  body:not(.is-playing) {
+    justify-content: center;
+  }
+  body:not(.is-playing) .avatar-wrap {
+    width: 380px; height: 380px;
+    margin: 0 auto;
+  }
+  body:not(.is-playing) .meta {
+    display: none;
+  }
+  #splash-title {
+    position: absolute;
+    top: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 64px;
+    font-weight: 700;
+    color: #202124;
+    white-space: nowrap;
+    z-index: 5;
+    transition: opacity .4s ease;
+  }
+  #splash-title .leaf { color: #d64545; }
+  body.is-playing #splash-title {
+    opacity: 0;
+    pointer-events: none;
   }
   .orbit-layer {
     position: absolute; inset: 0;
     pointer-events: none;
-    transition: transform .8s cubic-bezier(.22,.8,.3,1);
-    transform-origin: center;
-  }
-  body.is-playing .orbit-layer {
-    transform: scale(1.15);
   }
   .orbit-front { z-index: 2; }
   .spinner { position: absolute; inset: 0; }
@@ -72,13 +86,13 @@
   body.is-playing .orbit-front .odot:nth-child(2) { transform: rotate(311deg) translateX(86px); }
   .avatar-stage {
     position: relative;
-    width: 250px; height: 250px;
+    width: 300px; height: 300px;
     border-radius: 50%;
     overflow: hidden;
     background: #fff;
     z-index: 1;
     box-shadow: 0 4px 24px rgba(0,0,0,.08);
-    transition: width .9s cubic-bezier(.22,.8,.3,1), height .9s cubic-bezier(.22,.8,.3,1);
+    transition: width .6s ease, height .6s ease;
   }
   body.is-playing .avatar-stage { width: 300px; height: 300px; }
   .avatar-stage video {
@@ -89,46 +103,16 @@
     transition: opacity 0.6s ease;
   }
   .avatar-stage video.active { opacity: 1; }
-  #main-title {
-    position: absolute;
-    top: 72px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 64px;
-    font-weight: 700;
-    color: #202124;
-    white-space: nowrap;
-    z-index: 5;
-    transition: top .9s cubic-bezier(.22,.8,.3,1), left .9s cubic-bezier(.22,.8,.3,1),
-                transform .9s cubic-bezier(.22,.8,.3,1), font-size .9s ease;
-  }
-  #main-title .leaf { color: #d64545; }
-  body.is-playing #main-title {
-    top: 56px;
-    left: 544px;
-    transform: none;
-    font-size: 66px;
-  }
   /* ---- text block ---- */
   .meta {
     flex: 1 1 auto;
-    max-width: 780px;
-    text-align: left;
-    display: none;
-    flex-direction: column;
-    min-height: 0;
-    opacity: 0;
-    transform: translateX(60px);
-    transition: opacity .8s ease .15s, transform .9s cubic-bezier(.22,.8,.3,1) .15s;
-    pointer-events: none;
+    max-width: 700px;
+    transition: max-width 0.6s ease;
   }
   body.is-playing .meta {
-    display: flex;
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
-    padding-top: 150px;
+    max-width: 780px;
   }
+    text-align: left;
     display: flex; flex-direction: column;
     min-height: 0;
   }
@@ -196,7 +180,7 @@
 </style>
 </head>
 <body class="is-idle">
-  <h1 id="main-title">Maple <span class="leaf">🍁</span></h1>
+  <h1 id="splash-title">Maple <span class="leaf">🍁</span></h1>
   <div class="avatar-wrap" id="avatar-wrap">
     <div class="orbit-layer orbit-front" id="layer-front">
       <div class="spinner" data-mult="0.88"><div class="odot" style="width:30px;height:30px;margin:-15px 0 0 -15px;background:#d64545;transform:translateX(171px);box-shadow:0 0 14px 3px rgba(214,69,69,.6)"></div></div>
@@ -212,7 +196,8 @@
     </div>
   </div>
   <div class="meta">
-    <div class="sub" id="subtitle"></div>
+    <h1 id="title">Maple <span class="leaf">🍁</span></h1>
+    <div class="sub" id="subtitle">Ready</div>
     <div class="transcript-wrap" id="transcript-wrap">
       <div class="transcript" id="transcript"></div>
     </div>
@@ -223,11 +208,11 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v40';
+  var RECEIVER_VERSION = 'js-v41';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
-  var titleEl = document.getElementById('main-title');
+  var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
   var transcriptEl = document.getElementById('transcript');
   var vidIdle = document.getElementById('vid-idle');
@@ -326,11 +311,51 @@
 
   function setPlayingUI(playing) {
     setOrbitState(playing ? 'talking' : 'idle');
-    document.body.classList.toggle('is-playing', !!playing);
+    if (playing && !document.body.classList.contains('is-playing')) {
+      // FLIP: avatar from centered splash to left playing position
+      var wrap = document.getElementById('avatar-wrap');
+      var splashTitle = document.getElementById('splash-title');
+      var metaTitle = document.getElementById('title');
+      var r1 = wrap.getBoundingClientRect();
+      var t1 = splashTitle.getBoundingClientRect();
+      document.body.classList.add('is-playing');
+      // meta is now visible, measure target positions
+      var r2 = wrap.getBoundingClientRect();
+      var t2 = metaTitle.getBoundingClientRect();
+      // FLIP avatar
+      var dx = r1.left - r2.left, dy = r1.top - r2.top;
+      var sx = r1.width / r2.width, sy = r1.height / r2.height;
+      wrap.style.transition = 'none';
+      wrap.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
+      wrap.style.transformOrigin = 'center';
+      // FLIP splash title to meta title position
+      var tdx = t1.left + t1.width/2 - (t2.left + t2.width/2);
+      var tdy = t1.top + t1.height/2 - (t2.top + t2.height/2);
+      var tsx = t1.width / t2.width;
+      splashTitle.style.transition = 'none';
+      splashTitle.style.transform = 'translate(-50%, 0) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')';
+      splashTitle.style.transformOrigin = 'center';
+      void wrap.offsetHeight; // reflow
+      wrap.style.transition = 'transform .9s cubic-bezier(.22,.8,.3,1)';
+      splashTitle.style.transition = 'transform .9s cubic-bezier(.22,.8,.3,1), opacity .3s ease .7s';
+      wrap.style.transform = 'translate(0,0) scale(1,1)';
+      splashTitle.style.transform = 'translate(-50%, 0) translate(0,0) scale(1)';
+      splashTitle.style.opacity = '0';
+      setTimeout(function () {
+        wrap.style.transform = ''; wrap.style.transition = '';
+        splashTitle.style.display = 'none';
+      }, 950);
+    } else {
+      document.body.classList.toggle('is-playing', !!playing);
+    }
     document.body.classList.remove('is-idle');
     document.body.classList.remove('is-thinking');
     document.body.classList.remove('is-spinning-up');
     setAvatarMode(playing ? 'speaking' : 'idle');
+    if (!playing) {
+      var st = document.getElementById('splash-title');
+      if (st) { st.style.display = ''; st.style.opacity = ''; st.style.transform = ''; st.style.transition = ''; }
+    }
     if (playing) {
       // build visual lines NOW that container is visible (correct measurements)
       if (pendingText) { buildVisualLines(pendingText); pendingText = null; }
@@ -444,31 +469,13 @@
 
   var isDemo = location.search.indexOf('demo=1') >= 0;
   if (isDemo) {
-    // Demo: simulate full message -> thinking -> playing flow without real audio
     setTimeout(function () {
       handleMessage({
         title: 'Maple',
         subtitle: 'Voice note',
-        text: 'Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.'
-        // no audio_url: we simulate playback below
+        text: 'Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.',
+        audio_url: 'maple-voice-rx-1791741257.mp3'
       });
-      // manually enter thinking state (normally done by handleMessage when audio_url present)
-      setThinkingUI();
-      document.body.classList.add('is-spinning-up');
-      setOrbitState('spinup');
-      // simulate thinking (1.5s) then audio starting
-      setTimeout(function () {
-        document.body.classList.remove('is-spinning-up');
-        document.body.classList.remove('is-thinking');
-        setPlayingUI(true);
-        // fake 20s audio progress for highlight driver
-        var t0 = Date.now();
-        getPosition = function () {
-          var el = (Date.now() - t0) / 1000;
-          if (el > 20) { t0 = Date.now(); el = 0; } // loop
-          return { time: el, duration: 20 };
-        };
-      }, 1500);
     }, 1000);
   } else if (window.cast && window.cast.receiver) {
     var mgr = cast.receiver.CastReceiverManager.getInstance();
