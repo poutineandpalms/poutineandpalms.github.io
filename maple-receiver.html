@@ -6,113 +6,94 @@
 <title>Maple Speaker</title>
 <script src="https://www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
 <style>
+  /* ===== Design tokens ===== */
+  :root {
+    --bg: #faf9f7;
+    --ink: #202124;
+    --ink-soft: #5f6368;
+    --ink-pale: #b8b0a4;
+    --accent: #d64545;
+    --avatar-size: min(480px, 62vh);
+    --avatar-img: min(300px, 42vh);
+    --title-splash: clamp(40px, 8vh, 64px);
+    --title-playing: clamp(48px, 11vh, 66px);
+    --transcript-size: clamp(24px, 6.3vh, 38px);
+    --ease-slide: cubic-bezier(.22,.8,.3,1);
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; }
   body {
     font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: #faf9f7;
-    color: #202124;
-    display: flex; align-items: center; justify-content: center;
-    gap: 32px;
+    background: var(--bg);
+    color: var(--ink);
     overflow: hidden;
-    padding: 0 32px 0 24px;
-    justify-content: flex-start;
-    transition: padding 0.6s ease, gap 0.6s ease;
-  }
-  body.is-playing {
-    padding-left: 12px;
-    gap: 24px;
-  }
-  /* ---- avatar with orbit dots ---- */
-  .avatar-wrap {
-    position: relative;
-    width: 480px; height: 480px;
-    flex: 0 0 auto;
-    display: flex; align-items: center; justify-content: center;
-    transition: width .6s ease, height .6s ease;
-  }
-  body.is-playing .avatar-wrap { width: 480px; height: 480px; }
-  /* Splash (idle): centered avatar, title above, meta hidden */
-  body:not(.is-playing) {
-    justify-content: center;
-  }
-  body:not(.is-playing) {
-    flex-direction: column;
-    justify-content: center;
+    display: flex;
     align-items: center;
-    gap: 3vh;
+    justify-content: center;
   }
 
-  body:not(.is-playing) .avatar-wrap {
-    position: static;
-    transform: none;
-    width: min(480px, 62vh);
-    height: min(480px, 62vh);
-    margin: 0;
+  /* ===== Layout: splash (column, centered) vs playing (row, left) ===== */
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3vh;
+    width: 100%;
+    height: 100%;
+    padding: 4vh 4vw;
+    transition: flex-direction 0s; /* layout switch is instant; children animate */
   }
-  body:not(.is-playing) .avatar-stage {
-    width: min(300px, 42vh);
-    height: min(300px, 42vh);
+  body.is-playing .stage {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: clamp(16px, 2.5vw, 32px);
+    padding: 0 clamp(16px, 3vw, 32px) 0 clamp(8px, 1.2vw, 12px);
   }
-  body:not(.is-playing) .meta {
-    display: none;
-  }
+
+  /* ===== Title: single element, flies via CSS ===== */
   #title {
-    position: absolute;
-    top: 8vh;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: clamp(40px, 8vh, 64px);
     font-weight: 700;
-    color: #202124;
+    color: var(--ink);
     white-space: nowrap;
     z-index: 5;
-    transition: top 1.35s ease-in-out, left 1.35s ease-in-out,
-                transform 1.35s ease-in-out, font-size 1.35s ease-in-out;
+    font-size: var(--title-splash);
+    /* Splash: in normal flow, centered above avatar */
+    transition: font-size 1.35s ease-in-out;
   }
-  #title .leaf { color: #d64545; }
+  #title .leaf { color: var(--accent); }
   body.is-playing #title {
+    /* Playing: absolute, aligned with transcript */
+    position: absolute;
     top: 5vh;
-    left: 516px;
-    transform: none;
-    font-size: 66px;
+    left: var(--title-left, 50%);
+    transform: translateX(var(--title-tx, -50%));
+    font-size: var(--title-playing);
   }
-  .orbit-layer {
-    position: absolute; inset: 0;
-    pointer-events: none;
+
+  /* ===== Avatar with orbit dots ===== */
+  .avatar-wrap {
+    position: relative;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .orbit-front { z-index: 2; }
-  .spinner { position: absolute; inset: 0; }
-  .odot {
-    position: absolute; border-radius: 50%;
-    top: 50%; left: 50%;
-  }
-    transform: rotate(8deg) translateX(171px); box-shadow: 0 0 14px 3px rgba(214,69,69,.55); }
-  .orbit-back .odot:nth-child(2) { width: 11px; height: 11px; background: #c98a2e; margin: -5.5px 0 0 -5.5px;
-    transform: rotate(163deg) translateX(176px); box-shadow: 0 0 10px 2px rgba(201,138,46,.5); }
-  .orbit-back .odot:nth-child(3) { width: 13px; height: 13px; background: #e8788a; margin: -6.5px 0 0 -6.5px;
-    transform: rotate(247deg) translateX(168px); box-shadow: 0 0 12px 2px rgba(232,120,138,.5); }
-  .orbit-front .odot:nth-child(1) { width: 12px; height: 12px; background: #f5a623; margin: -6px 0 0 -6px;
-    transform: rotate(96deg) translateX(174px); box-shadow: 0 0 12px 3px rgba(245,166,35,.6); }
-  .orbit-front .odot:nth-child(2) { width: 16px; height: 16px; background: #b3271e; margin: -8px 0 0 -8px;
-    transform: rotate(311deg) translateX(173px); box-shadow: 0 0 14px 3px rgba(179,39,30,.55); }
-  body.is-playing .orbit-back .odot:nth-child(1) { transform: rotate(8deg) translateX(86px); }
-  body.is-playing .orbit-back .odot:nth-child(2) { transform: rotate(163deg) translateX(88px); }
-  body.is-playing .orbit-back .odot:nth-child(3) { transform: rotate(247deg) translateX(85px); }
-  body.is-playing .orbit-front .odot:nth-child(1) { transform: rotate(96deg) translateX(87px); }
-  body.is-playing .orbit-front .odot:nth-child(2) { transform: rotate(311deg) translateX(86px); }
   .avatar-stage {
     position: relative;
-    width: 300px; height: 300px;
+    width: var(--avatar-img);
+    height: var(--avatar-img);
     border-radius: 50%;
     overflow: hidden;
     background: #fff;
     z-index: 1;
     border: 2px solid #e0e0e0;
     box-shadow: 0 4px 24px rgba(0,0,0,.08);
-    transition: width .6s ease, height .6s ease;
   }
-  body.is-playing .avatar-stage { width: 300px; height: 300px; }
   .avatar-stage video {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
@@ -121,168 +102,162 @@
     transition: opacity 0.6s ease;
   }
   .avatar-stage video.active { opacity: 1; }
-  /* ---- text block ---- */
+
+  /* Orbit: dots positioned via CSS var --orbit-r (responsive) */
+  .orbit-layer {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    --orbit-r: calc(var(--avatar-size) * 0.36);
+  }
+  .orbit-front { z-index: 2; }
+  .spinner { position: absolute; inset: 0; }
+  .odot {
+    position: absolute; border-radius: 50%;
+    top: 50%; left: 50%;
+  }
+
+  /* ===== Text block (transcript) ===== */
   .meta {
     flex: 1 1 auto;
-    max-width: 780px;
-    text-align: left;
+    max-width: min(780px, 60vw);
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    min-height: 0;
     opacity: 0;
     pointer-events: none;
   }
   body.is-playing .meta {
-    max-width: 780px;
     pointer-events: auto;
-    padding-top: 110px;
+    padding-top: 11vh;
   }
   body.is-playing .meta.show {
     opacity: 1;
-    transition: opacity .8s ease;
+    transition: opacity 0.8s ease;
   }
-  h1 {
-    margin-top: 24px;
-    font-size: 96px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    line-height: 1;
-    white-space: nowrap;
-    transition: font-size 0.8s ease;
-    color: #202124;
-  }
-  h1 .leaf { color: #d64545; }
-  body.is-playing h1 { font-size: 66px; }
   .sub {
-    margin-top: 10px;
-    font-size: 18px;
-    color: #5f6368;
+    margin-top: 1vh;
+    font-size: clamp(12px, 2.4vh, 18px);
+    color: var(--ink-soft);
     letter-spacing: 4px;
     text-transform: uppercase;
   }
-  /* ---- transcript with line highlighting ---- */
   .transcript-wrap {
-    margin-top: 24px;
-    max-height: 0;
-    opacity: 0;
-    transform: translateY(12px);
+    margin-top: 2.5vh;
     overflow: hidden;
-    transition: max-height 0.9s ease, opacity 0.9s ease, transform 0.9s ease;
-  }
-  body.is-playing .transcript-wrap {
-    max-height: 460px;
-    opacity: 1;
-    transform: translateY(0);
   }
   .transcript {
-    max-height: 480px;
+    max-height: 62vh;
     overflow-y: auto;
-    padding-bottom: 60px;
-    font-size: 38px;
+    padding-bottom: 8vh;
+    font-size: var(--transcript-size);
     line-height: 1.5;
     padding-right: 16px;
     scrollbar-width: none;
   }
   .transcript::-webkit-scrollbar { display: none; }
-  .w { /* word span for line measurement */ }
   .tline {
-    color: #b8b0a4; /* pale = not yet read */
+    color: var(--ink-pale);
     transition: color 0.5s ease;
-    margin-bottom: 8px;
+    margin-bottom: 1vh;
   }
-  .tline.current { color: #202124; /* dark = being read */ font-weight: 500; }
-  .tline.read { color: #5f6368; /* medium = already read */ }
-  .hint {
-    position: absolute; bottom: 20px; left: 0; right: 0;
-    text-align: center;
-    font-size: 13px; color: #c9c2b8; letter-spacing: 1px;
-  }
+  .tline.current { color: var(--ink); font-weight: 500; }
+  .tline.read { color: var(--ink-soft); }
+
   .version {
     position: absolute; bottom: 12px; right: 16px;
     font-size: 11px; color: #d8d2c8; letter-spacing: 0.5px;
     background: rgba(0,0,0,0.04); padding: 2px 8px; border-radius: 4px;
+    z-index: 10;
   }
 </style>
 </head>
-<body class="is-idle">
-  <h1 id="title">Maple <span class="leaf">🍁</span></h1>
-  <div class="avatar-wrap" id="avatar-wrap">
-    <div class="orbit-layer orbit-front" id="layer-front">
-      <div class="spinner" data-mult="0.88"><div class="odot" style="width:30px;height:30px;margin:-15px 0 0 -15px;background:#d64545;transform:translateX(171px);box-shadow:0 0 14px 3px rgba(214,69,69,.6)"></div></div>
-      <div class="spinner" data-mult="1.12"><div class="odot" style="width:21px;height:21px;margin:-10.5px 0 0 -10.5px;background:#ffb300;transform:translateX(176px);box-shadow:0 0 10px 2px rgba(255,179,0,.55)"></div></div>
-      <div class="spinner" data-mult="0.95"><div class="odot" style="width:21px;height:21px;margin:-10.5px 0 0 -10.5px;background:#a91e14;transform:translateX(168px);box-shadow:0 0 12px 2px rgba(169,30,20,.6)"></div></div>
-      <div class="spinner" data-mult="1.05"><div class="odot" style="width:26px;height:26px;margin:-13px 0 0 -13px;background:#f5a623;transform:translateX(174px);box-shadow:0 0 12px 3px rgba(245,166,35,.6)"></div></div>
-      <div class="spinner" data-mult="0.92"><div class="odot" style="width:26px;height:26px;margin:-13px 0 0 -13px;background:#e8830c;transform:translateX(173px);box-shadow:0 0 14px 3px rgba(232,131,12,.6)"></div></div>
-      <div class="spinner" data-mult="1.08"><div class="odot" style="width:18px;height:18px;margin:-9px 0 0 -9px;background:#c62828;transform:translateX(170px);box-shadow:0 0 12px 2px rgba(198,40,40,.55)"></div></div>
+<body>
+  <div class="stage" id="stage">
+    <h1 id="title">Maple <span class="leaf">🍁</span></h1>
+    <div class="avatar-wrap" id="avatar-wrap">
+      <div class="orbit-layer orbit-front" id="layer-front"><!-- dots injected by JS --></div>
+      <div class="avatar-stage">
+        <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
+        <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
+      </div>
     </div>
-    <div class="avatar-stage">
-      <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
-      <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
-    </div>
-  </div>
-  <div class="meta">
-    <div class="sub" id="subtitle"></div>
-    <div class="transcript-wrap" id="transcript-wrap">
-      <div class="transcript" id="transcript"></div>
+    <div class="meta" id="meta">
+      <div class="sub" id="subtitle"></div>
+      <div class="transcript-wrap">
+        <div class="transcript" id="transcript"></div>
+      </div>
     </div>
   </div>
-  <div class="hint" id="hint"></div>
   <div class="version" id="version"></div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
+  'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v57';
+  var RECEIVER_VERSION = 'js-v58';
   var castMgr = null;
-  var hintEl = document.getElementById('hint');
+
   document.getElementById('version').textContent = RECEIVER_VERSION;
+
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
   var transcriptEl = document.getElementById('transcript');
+  var metaEl = document.getElementById('meta');
+  var wrapEl = document.getElementById('avatar-wrap');
   var vidIdle = document.getElementById('vid-idle');
   var vidSpeaking = document.getElementById('vid-speaking');
-  var scrollRaf = null;
-  var lineEls = [];
-  var thinkingTimeout = null;
-  var pendingText = null;
-  // ---- orbit driver: eased angular velocity, per-dot speed multipliers ----
-  var spinners = [];
-  var orbitVel = 15; // deg/sec, current (eased)
-  var orbitTarget = 15; // deg/sec, target
+
+  /* ===== Orbit dots: generated by JS (clean, no hardcoded HTML) ===== */
+  var DOTS = [
+    { size: 30, color: '#d64545', glow: 'rgba(214,69,69,.6)' },
+    { size: 14, color: '#ffb300', glow: 'rgba(255,179,0,.55)' },
+    { size: 21, color: '#a91e14', glow: 'rgba(169,30,20,.6)' },
+    { size: 17, color: '#f5a623', glow: 'rgba(245,166,35,.6)' },
+    { size: 26, color: '#e8830c', glow: 'rgba(232,131,12,.6)' },
+    { size: 18, color: '#c62828', glow: 'rgba(198,40,40,.55)' }
+  ];
   var SPEEDS = { idle: 15, thinking: 66, spinup: 168, talking: 38 };
+  var spinners = [];
+  var orbitVel = SPEEDS.idle, orbitTarget = SPEEDS.idle;
+
   function initOrbit() {
-    var els = document.querySelectorAll('.spinner');
-    for (var i = 0; i < els.length; i++) {
-      // jittered uniform: base 60° apart + ±18° random offset (no clumping, not mechanical)
-      var baseAngle = (360 / els.length) * i;
-      var jitter = (Math.random() * 36) - 18;
-      var startAngle = (baseAngle + jitter + 360) % 360;
-      els[i].style.transform = 'rotate(' + startAngle + 'deg)';
-      spinners.push({ el: els[i], mult: parseFloat(els[i].getAttribute('data-mult')) || 1, angle: startAngle });
-    }
+    var layer = document.getElementById('layer-front');
+    DOTS.forEach(function (d, i) {
+      var spinner = document.createElement('div');
+      spinner.className = 'spinner';
+      // Per-dot speed multiplier (organic, not mechanical)
+      var mults = [0.88, 1.12, 0.95, 1.05, 0.92, 1.08];
+      var dot = document.createElement('div');
+      dot.className = 'odot';
+      // Hardcode inline styles (Hub drops CSS-var dot colors — v24 lesson)
+      dot.style.cssText =
+        'width:' + d.size + 'px;height:' + d.size + 'px;' +
+        'margin:' + (-d.size/2) + 'px 0 0 ' + (-d.size/2) + 'px;' +
+        'background:' + d.color + ';' +
+        'transform:translateX(var(--orbit-r));' +
+        'box-shadow:0 0 12px 3px ' + d.glow + ';';
+      spinner.appendChild(dot);
+      layer.appendChild(spinner);
+      // Jittered uniform distribution: 60° apart ± 18°
+      var startAngle = ((360 / DOTS.length) * i + (Math.random() * 36 - 18) + 360) % 360;
+      spinner.style.transform = 'rotate(' + startAngle + 'deg)';
+      spinners.push({ el: spinner, mult: mults[i % mults.length], angle: startAngle });
+    });
     var last = performance.now();
-    var tick = function (now) {
+    (function tick(now) {
       var dt = Math.min(0.05, (now - last) / 1000); last = now;
-      orbitVel += (orbitTarget - orbitVel) * 0.04;
+      orbitVel += (orbitTarget - orbitVel) * 0.04; // eased accel/decel
       for (var j = 0; j < spinners.length; j++) {
         var s = spinners[j];
         s.angle = (s.angle + orbitVel * s.mult * dt) % 360;
         s.el.style.transform = 'rotate(' + s.angle + 'deg)';
       }
       requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    })(last);
   }
-  function setOrbitState(state) {
-    orbitTarget = SPEEDS[state] || SPEEDS.idle;
-  }
+  function setOrbitState(state) { orbitTarget = SPEEDS[state] || SPEEDS.idle; }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
+  /* ===== Avatar videos ===== */
   function setAvatarMode(mode) {
     var idle = mode !== 'speaking';
     vidIdle.classList.toggle('active', idle);
@@ -293,207 +268,190 @@
     hide.pause();
   }
 
-  function stopScroll() {
-    if (scrollRaf) { cancelAnimationFrame(scrollRaf); scrollRaf = null; }
-  }
+  /* ===== Transcript highlighting ===== */
+  var lineEls = [], scrollRaf = null, pendingText = null;
 
   function getPosition() {
     var a = document.getElementById('fallback-audio');
-    if (a && isFinite(a.duration) && a.duration > 0) {
+    if (a && isFinite(a.duration) && a.duration > 0)
       return { time: a.currentTime || 0, duration: a.duration };
-    }
     return null;
   }
 
   function driveHighlight() {
-    stopScroll();
-    var step = function () {
+    if (scrollRaf) cancelAnimationFrame(scrollRaf);
+    (function step() {
       var pos = getPosition();
-      if (pos && lineEls.length > 0) {
+      if (pos && lineEls.length) {
         var p = Math.min(1, Math.max(0, pos.time / pos.duration));
         var idx = Math.min(lineEls.length - 1, Math.floor(p * lineEls.length));
         for (var i = 0; i < lineEls.length; i++) {
           lineEls[i].classList.toggle('current', i === idx);
           lineEls[i].classList.toggle('read', i < idx);
         }
-        // auto-scroll to keep current line visible
         var cur = lineEls[idx];
         if (cur) {
-          var wrapTop = transcriptEl.scrollTop;
-          var wrapBottom = wrapTop + transcriptEl.clientHeight;
-          var lineTop = cur.offsetTop;
-          var lineBottom = lineTop + cur.offsetHeight;
-          if (lineTop < wrapTop || lineBottom > wrapBottom) {
-            transcriptEl.scrollTop = lineTop - transcriptEl.clientHeight / 2;
-          }
+          var wt = transcriptEl.scrollTop, wb = wt + transcriptEl.clientHeight;
+          var lt = cur.offsetTop, lb = lt + cur.offsetHeight;
+          if (lt < wt || lb > wb) transcriptEl.scrollTop = lt - transcriptEl.clientHeight / 2;
         }
       }
       scrollRaf = requestAnimationFrame(step);
-    };
-    step();
-  }
-
-  function flipToPlaying() {
-    if (document.body.classList.contains('is-playing')) return;
-    var wrap = document.getElementById('avatar-wrap');
-    var meta = document.querySelector('.meta');
-    var r1 = wrap.getBoundingClientRect();
-    document.body.classList.add('is-playing');
-    // Title moves via CSS transition (left set in CSS)
-    var r2 = wrap.getBoundingClientRect();
-    var dx = r1.left - r2.left, dy = r1.top - r2.top;
-    var sx = r1.width / r2.width, sy = r1.height / r2.height;
-    wrap.animate([
-      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' },
-      { transform: 'translate(0,0) scale(1,1)' }
-    ], { duration: 1350, easing: 'ease-in-out', fill: 'forwards' });
-    // Show meta (transcript) after avatar finishes
-    setTimeout(function () { meta.classList.add('show'); }, 1400);
-  }
-  function setPlayingUI(playing) {
-    setOrbitState(playing ? 'talking' : 'idle');
-    document.body.classList.toggle('is-playing', !!playing);
-    document.body.classList.remove('is-idle');
-    document.body.classList.remove('is-thinking');
-    document.body.classList.remove('is-spinning-up');
-    setAvatarMode(playing ? 'speaking' : 'idle');
-    if (!playing) {
-      var m = document.querySelector('.meta');
-      if (m) m.classList.remove('show');
-      document.body.classList.remove('is-playing');
-    }
-    if (playing) {
-      // build visual lines NOW that container is visible (correct measurements)
-      if (pendingText) { buildVisualLines(pendingText); pendingText = null; }
-      transcriptEl.scrollTop = 0;
-      driveHighlight();
-    } else stopScroll();
-  }
-
-  function setThinkingUI() {
-    setOrbitState('thinking');
-    document.body.classList.add('is-thinking');
-    document.body.classList.remove('is-idle');
-    setAvatarMode('speaking');
+    })();
   }
 
   function buildVisualLines(text) {
-    // Split into words, render, then group by actual visual line (offsetTop)
-    transcriptEl.innerHTML = '';
-    lineEls = [];
-    var words = text.split(/\s+/);
-    var wordSpans = [];
-    words.forEach(function (w, i) {
+    transcriptEl.innerHTML = ''; lineEls = [];
+    var words = text.split(/\s+/), spans = [];
+    words.forEach(function (w) {
       var s = document.createElement('span');
-      s.className = 'w';
       s.textContent = w;
       transcriptEl.appendChild(s);
       transcriptEl.appendChild(document.createTextNode(' '));
-      wordSpans.push(s);
+      spans.push(s);
     });
-    // Group words by visual line using offsetTop
-    var lines = [];
-    var currentLine = [];
-    var currentTop = null;
-    wordSpans.forEach(function (s) {
-      var top = s.offsetTop;
-      if (currentTop === null || Math.abs(top - currentTop) < 5) {
-        currentLine.push(s);
-      } else {
-        lines.push(currentLine);
-        currentLine = [s];
-      }
-      currentTop = top;
+    var lines = [], cur = [], top = null;
+    spans.forEach(function (s) {
+      if (top === null || Math.abs(s.offsetTop - top) < 5) cur.push(s);
+      else { lines.push(cur); cur = [s]; }
+      top = s.offsetTop;
     });
-    if (currentLine.length > 0) lines.push(currentLine);
-    // Wrap each visual line in a div for highlighting
-    transcriptEl.innerHTML = '';
-    lineEls = [];
-    lines.forEach(function (lineWords) {
+    if (cur.length) lines.push(cur);
+    transcriptEl.innerHTML = ''; lineEls = [];
+    lines.forEach(function (lw) {
       var div = document.createElement('div');
       div.className = 'tline';
-      lineWords.forEach(function (w, i) {
+      lw.forEach(function (w, i) {
         div.appendChild(w);
-        if (i < lineWords.length - 1) div.appendChild(document.createTextNode(' '));
+        if (i < lw.length - 1) div.appendChild(document.createTextNode(' '));
       });
       transcriptEl.appendChild(div);
       lineEls.push(div);
     });
   }
 
+  /* ===== Splash → playing transition =====
+     Avatar slides via FLIP (CSS transition fallback if no WAAPI).
+     Title flies via CSS (top/left/font-size). Meta fades in after. */
+  function flipToPlaying() {
+    if (document.body.classList.contains('is-playing')) return;
+    var r1 = wrapEl.getBoundingClientRect();
+    document.body.classList.add('is-playing');
+    // Align title with transcript left edge
+    var metaLeft = metaEl.getBoundingClientRect().left;
+    document.documentElement.style.setProperty('--title-left', metaLeft + 'px');
+    document.documentElement.style.setProperty('--title-tx', '0');
+    var r2 = wrapEl.getBoundingClientRect();
+    var dx = r1.left - r2.left, dy = r1.top - r2.top;
+    var sx = r1.width / r2.width, sy = r1.height / r2.height;
+    var from = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
+    var to = 'translate(0,0) scale(1,1)';
+    if (wrapEl.animate) {
+      wrapEl.animate(
+        [{ transform: from }, { transform: to }],
+        { duration: 1350, easing: 'ease-in-out', fill: 'forwards' }
+      );
+    } else {
+      // Fallback: CSS transition (older browsers, e.g. Vizio TV)
+      wrapEl.style.transition = 'none';
+      wrapEl.style.transform = from;
+      void wrapEl.offsetHeight;
+      wrapEl.style.transition = 'transform 1.35s ease-in-out';
+      wrapEl.style.transform = to;
+      setTimeout(function () { wrapEl.style.transition = ''; wrapEl.style.transform = ''; }, 1400);
+    }
+    setTimeout(function () { metaEl.classList.add('show'); }, 1400);
+  }
+
+  /* ===== UI states ===== */
+  var thinkingTimeout = null;
+  function setPlayingUI(playing) {
+    setOrbitState(playing ? 'talking' : 'idle');
+    document.body.classList.toggle('is-playing', !!playing);
+    setAvatarMode(playing ? 'speaking' : 'idle');
+    if (!playing) {
+      metaEl.classList.remove('show');
+      document.body.classList.remove('is-playing');
+      document.documentElement.style.setProperty('--title-left', '50%');
+      document.documentElement.style.setProperty('--title-tx', '-50%');
+      if (scrollRaf) { cancelAnimationFrame(scrollRaf); scrollRaf = null; }
+    } else {
+      if (pendingText) { buildVisualLines(pendingText); pendingText = null; }
+      transcriptEl.scrollTop = 0;
+      driveHighlight();
+    }
+  }
+  function setThinkingUI() {
+    setOrbitState('thinking');
+    setAvatarMode('speaking');
+  }
+
+  /* ===== Audio ===== */
   function playAudio(url) {
     var a = document.getElementById('fallback-audio');
     try {
       a.src = url;
       a.onended = function () {
         setPlayingUI(false);
-        // keep UI for 10s, then end the Cast session
-        setTimeout(function () {
-          try { if (castMgr) castMgr.stop(); } catch (e) {}
-        }, 10000);
+        setTimeout(function () { try { if (castMgr) castMgr.stop(); } catch (e) {} }, 10000);
       };
       a.onplaying = function () {
-        // audio is ACTUALLY playing -> sync highlight to this exact moment
         if (thinkingTimeout) { clearTimeout(thinkingTimeout); thinkingTimeout = null; }
-        document.body.classList.remove('is-spinning-up');
-        document.body.classList.remove('is-thinking');
-        setPlayingUI(true); // starts highlight driver in sync
+        setOrbitState('talking');
+        setPlayingUI(true);
       };
       var p = a.play();
       if (p && p.catch) p.catch(function () {});
     } catch (e) {}
   }
 
+  /* ===== Messages ===== */
   var lastMsgText = null;
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
   function handleMessage(d) {
     d = d || {};
     if (d.text && d.text === lastMsgText) return;
     lastMsgText = d.text || null;
     if (d.title) titleEl.innerHTML = escapeHtml(d.title) + ' <span class="leaf">🍁</span>';
     if (d.subtitle) subEl.textContent = d.subtitle;
-    if (d.text) {
-      pendingText = d.text;
-      // lines built when container becomes visible (in setPlayingUI)
-    }
+    if (d.text) pendingText = d.text;
     if (d.audio_url) {
-      // thinking until audio actually plays (onplaying -> setPlayingUI)
       flipToPlaying();
       setThinkingUI();
       if (thinkingTimeout) clearTimeout(thinkingTimeout);
-      document.body.classList.add('is-spinning-up');
       setOrbitState('spinup');
-      // safety: if onplaying never fires, don't stay stuck in thinking
-      thinkingTimeout = setTimeout(function () {
-        document.body.classList.remove('is-spinning-up');
-        setPlayingUI(true);
-      }, 8000);
+      thinkingTimeout = setTimeout(function () { setPlayingUI(true); }, 8000);
       playAudio(d.audio_url);
     }
   }
 
   initOrbit();
-  setOrbitState('idle');
 
+  /* ===== Demo mode ===== */
   var isDemo = location.search.indexOf('demo=1') >= 0;
   if (isDemo) {
-    // Demo: simulate full flow without real audio
     setTimeout(function () {
-      // Simulate message receipt (triggers FLIP + thinking)
       flipToPlaying();
       setThinkingUI();
-      document.body.classList.remove('is-spinning-up');
-      // Store text; lines built in setPlayingUI when layout is ready (correct width)
       pendingText = 'Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.';
-      // Simulate audio starting after 1.5s thinking
       setTimeout(function () {
         setPlayingUI(true);
-        // Fake 20s audio clock for highlight driver (loops)
+        // Simulated 20s clock (demo only, does not leak: scoped var)
         var t0 = Date.now();
-        getPosition = function () {
+        var demoClock = function () {
           var el = (Date.now() - t0) / 1000;
           if (el > 20) { t0 = Date.now(); el = 0; }
           return { time: el, duration: 20 };
         };
+        // Temporarily override for demo; restore on next real message
+        var realGetPosition = getPosition;
+        getPosition = demoClock;
+        // Store restore fn so handleMessage can reset it
+        window.__restoreClock = function () { getPosition = realGetPosition; };
       }, 1500);
     }, 1000);
   } else if (window.cast && window.cast.receiver) {
@@ -501,13 +459,15 @@
     castMgr = mgr;
     var bus = mgr.getCastMessageBus(NAMESPACE);
     bus.onMessage = function (event) {
-      try { handleMessage(JSON.parse(event.data)); }
-      catch (e) { try { handleMessage(event.data); } catch (x) {} }
+      try {
+        if (window.__restoreClock) { window.__restoreClock(); window.__restoreClock = null; }
+        handleMessage(JSON.parse(event.data));
+      } catch (e) { try { handleMessage(event.data); } catch (x) {} }
     };
     mgr.onSenderConnected = function (event) {
-      try { bus.send(event.senderId, JSON.stringify({type: 'READY', version: RECEIVER_VERSION})); } catch (e) {}
+      try { bus.send(event.senderId, JSON.stringify({ type: 'READY', version: RECEIVER_VERSION })); } catch (e) {}
     };
-    try { mgr.start({statusText: 'Maple'}); } catch (e) {}
+    try { mgr.start({ statusText: 'Maple' }); } catch (e) {}
   }
 })();
 </script>
