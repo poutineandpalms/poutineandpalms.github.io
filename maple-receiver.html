@@ -13,9 +13,10 @@
     background: #faf9f7;
     color: #202124;
     display: flex; align-items: center; justify-content: center;
-    gap: 48px;
+    gap: 32px;
     overflow: hidden;
-    padding: 0 40px;
+    padding: 0 32px 0 24px;
+    justify-content: flex-start;
   }
   /* ---- avatar with orbit dots ---- */
   .avatar-wrap {
@@ -78,6 +79,7 @@
     min-height: 0;
   }
   h1 {
+    margin-top: 24px;
     font-size: 96px;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -167,7 +169,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v31';
+  var RECEIVER_VERSION = 'js-v32';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -179,6 +181,7 @@
   var scrollRaf = null;
   var lineEls = [];
   var thinkingTimeout = null;
+  var pendingText = null;
   // ---- orbit driver: eased angular velocity, per-dot speed multipliers ----
   var spinners = [];
   var orbitVel = 15; // deg/sec, current (eased)
@@ -274,7 +277,12 @@
     document.body.classList.remove('is-thinking');
     document.body.classList.remove('is-spinning-up');
     setAvatarMode(playing ? 'speaking' : 'idle');
-    if (playing) driveHighlight(); else stopScroll();
+    if (playing) {
+      // build visual lines NOW that container is visible (correct measurements)
+      if (pendingText) { buildVisualLines(pendingText); pendingText = null; }
+      transcriptEl.scrollTop = 0;
+      driveHighlight();
+    } else stopScroll();
   }
 
   function setThinkingUI() {
@@ -359,8 +367,8 @@
     if (d.title) titleEl.innerHTML = escapeHtml(d.title) + ' <span class="leaf">🍁</span>';
     if (d.subtitle) subEl.textContent = d.subtitle;
     if (d.text) {
-      buildVisualLines(d.text);
-      transcriptEl.scrollTop = 0;
+      pendingText = d.text;
+      // lines built when container becomes visible (in setPlayingUI)
     }
     if (d.audio_url) {
       // thinking until audio actually plays (onplaying -> setPlayingUI)
