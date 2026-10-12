@@ -43,8 +43,10 @@
     gap: 3vh;
   }
   body:not(.is-playing) #splash-title {
-    position: static;
-    transform: none;
+    position: absolute;
+    top: 8vh;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: clamp(40px, 8vh, 64px);
   }
   body:not(.is-playing) .avatar-wrap {
@@ -227,7 +229,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v45';
+  var RECEIVER_VERSION = 'js-v46';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -350,15 +352,15 @@
     splashTitle.style.transform = 'translate(-50%, 0) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')';
     splashTitle.style.transformOrigin = 'center';
     void wrap.offsetHeight;
-    wrap.style.transition = 'transform .9s cubic-bezier(.22,.8,.3,1)';
-    splashTitle.style.transition = 'transform .9s cubic-bezier(.22,.8,.3,1), opacity .3s ease .7s';
+    wrap.style.transition = 'transform 1.35s ease-in-out';
+    splashTitle.style.transition = 'transform 1.35s ease-in-out, opacity .3s ease 1.1s';
     wrap.style.transform = 'translate(0,0) scale(1,1)';
     splashTitle.style.transform = 'translate(-50%, 0) translate(0,0) scale(1)';
     splashTitle.style.opacity = '0';
     setTimeout(function () {
       wrap.style.transform = ''; wrap.style.transition = '';
       splashTitle.style.display = 'none';
-    }, 950);
+    }, 1400);
   }
   function setPlayingUI(playing) {
     setOrbitState(playing ? 'talking' : 'idle');
