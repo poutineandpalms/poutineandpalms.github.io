@@ -127,19 +127,16 @@
     flex-direction: column;
     min-height: 0;
     opacity: 0;
-    visibility: hidden;
     pointer-events: none;
-    position: absolute;
-    left: -9999px;
   }
   body.is-playing .meta {
-    position: static;
-    visibility: visible;
     max-width: 780px;
-    opacity: 1;
     pointer-events: auto;
     padding-top: 150px;
-    transition: opacity .8s ease 1.4s, visibility 0s 1.4s;
+  }
+  body.is-playing .meta.show {
+    opacity: 1;
+    transition: opacity .8s ease;
   }
   h1 {
     margin-top: 24px;
@@ -233,7 +230,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v51';
+  var RECEIVER_VERSION = 'js-v52';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -339,36 +336,38 @@
     var wrap = document.getElementById('avatar-wrap');
     var splashTitle = document.getElementById('splash-title');
     var metaTitle = document.getElementById('title');
+    var meta = document.querySelector('.meta');
+    // Measure starting positions (splash layout)
     var r1 = wrap.getBoundingClientRect();
     var t1 = splashTitle.getBoundingClientRect();
+    // Switch to playing layout (avatar jumps to left, meta appears in layout but invisible)
     document.body.classList.add('is-playing');
     var r2 = wrap.getBoundingClientRect();
     var t2 = metaTitle.getBoundingClientRect();
+    // Animate avatar from r1 to r2 using Web Animations API
     var dx = r1.left - r2.left, dy = r1.top - r2.top;
     var sx = r1.width / r2.width, sy = r1.height / r2.height;
-    wrap.style.transition = 'none';
-    wrap.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
-    wrap.style.transformOrigin = 'center';
-    var tdx = t2.left - t1.left;
-    var tdy = t2.top - t1.top;
+    wrap.animate([
+      { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' },
+      { transform: 'translate(0,0) scale(1,1)' }
+    ], { duration: 1350, easing: 'ease-in-out', fill: 'forwards' });
+    // Animate title from t1 to t2
+    var tdx = t2.left - t1.left, tdy = t2.top - t1.top;
     var tsx = t2.width / t1.width;
-    splashTitle.style.transition = 'none';
-    splashTitle.style.transform = 'translateX(-50%)';
+    // Keep splash title visible during flight (override the CSS opacity:0)
     splashTitle.style.opacity = '1';
-    void splashTitle.offsetHeight;
-    void splashTitle.offsetWidth;
-    wrap.style.transition = 'transform 1.35s ease-in-out';
-    splashTitle.style.transition = 'transform 1.35s ease-in-out, opacity .4s ease 1.0s';
-    wrap.style.transform = 'translate(0,0) scale(1,1)';
-    // Force the browser to recognize the starting state before animating
-    requestAnimationFrame(function () {
-      splashTitle.style.transform = 'translateX(-50%) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')';
-      splashTitle.style.transformOrigin = 'top left';
-      splashTitle.style.opacity = '0';
-    });
+    var titleAnim = splashTitle.animate([
+      { transform: 'translateX(-50%) translate(0px,0px) scale(1)', opacity: 1 },
+      { transform: 'translateX(-50%) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')', opacity: 1 }
+    ], { duration: 1350, easing: 'ease-in-out', fill: 'forwards' });
+    // After flight, fade out splash title (meta title is already in place underneath)
+    titleAnim.onfinish = function () {
+      splashTitle.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' })
+        .onfinish = function () { splashTitle.style.display = 'none'; };
+    };
+    // Show meta (transcript) ONLY after avatar finishes (1.4s)
     setTimeout(function () {
-      wrap.style.transform = ''; wrap.style.transition = '';
-      splashTitle.style.display = 'none';
+      meta.classList.add('show');
     }, 1400);
   }
   function setPlayingUI(playing) {
@@ -380,7 +379,10 @@
     setAvatarMode(playing ? 'speaking' : 'idle');
     if (!playing) {
       var st = document.getElementById('splash-title');
-      if (st) { st.style.display = ''; st.style.opacity = ''; st.style.transform = ''; st.style.transition = ''; }
+      if (st) { st.style.display = ''; st.style.opacity = ''; }
+      var m = document.querySelector('.meta');
+      if (m) m.classList.remove('show');
+      document.body.classList.remove('is-playing');
     }
     if (playing) {
       // build visual lines NOW that container is visible (correct measurements)
