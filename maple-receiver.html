@@ -229,7 +229,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v49';
+  var RECEIVER_VERSION = 'js-v50';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -487,13 +487,26 @@
 
   var isDemo = location.search.indexOf('demo=1') >= 0;
   if (isDemo) {
+    // Demo: simulate full flow without real audio
     setTimeout(function () {
-      handleMessage({
-        title: 'Maple',
-        subtitle: 'Voice note',
-        text: 'Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.',
-        audio_url: 'maple-voice-rx-1791741257.mp3'
-      });
+      // Simulate message receipt (triggers FLIP + thinking)
+      flipToPlaying();
+      setThinkingUI();
+      document.body.classList.remove('is-spinning-up');
+      // Build transcript lines (normally done in setPlayingUI)
+      buildVisualLines('Hey Alex! This is the new orbit dots design. Notice how the dots spin fast while Maple is thinking, then settle into a steady rhythm while talking. The transcript highlights line by line as the audio plays.');
+      transcriptEl.scrollTop = 0;
+      // Simulate audio starting after 1.5s thinking
+      setTimeout(function () {
+        setPlayingUI(true);
+        // Fake 20s audio clock for highlight driver (loops)
+        var t0 = Date.now();
+        getPosition = function () {
+          var el = (Date.now() - t0) / 1000;
+          if (el > 20) { t0 = Date.now(); el = 0; }
+          return { time: el, duration: 20 };
+        };
+      }, 1500);
     }, 1000);
   } else if (window.cast && window.cast.receiver) {
     var mgr = cast.receiver.CastReceiverManager.getInstance();
