@@ -167,7 +167,8 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v30';
+  var RECEIVER_VERSION = 'js-v31';
+  var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
   var titleEl = document.getElementById('title');
@@ -331,7 +332,13 @@
     var a = document.getElementById('fallback-audio');
     try {
       a.src = url;
-      a.onended = function () { setPlayingUI(false); };
+      a.onended = function () {
+        setPlayingUI(false);
+        // keep UI for 10s, then end the Cast session
+        setTimeout(function () {
+          try { if (castMgr) castMgr.stop(); } catch (e) {}
+        }, 10000);
+      };
       a.onplaying = function () {
         // audio is ACTUALLY playing -> sync highlight to this exact moment
         if (thinkingTimeout) { clearTimeout(thinkingTimeout); thinkingTimeout = null; }
@@ -385,6 +392,7 @@
     }, 1000);
   } else if (window.cast && window.cast.receiver) {
     var mgr = cast.receiver.CastReceiverManager.getInstance();
+    castMgr = mgr;
     var bus = mgr.getCastMessageBus(NAMESPACE);
     bus.onMessage = function (event) {
       try { handleMessage(JSON.parse(event.data)); }
