@@ -25,7 +25,7 @@
     display: flex; align-items: center; justify-content: center;
     transition: width .6s ease, height .6s ease;
   }
-  body.is-playing .avatar-wrap { width: 240px; height: 240px; }
+  body.is-playing .avatar-wrap { width: 320px; height: 320px; }
   .orbit-layer {
     position: absolute; inset: 0;
     pointer-events: none;
@@ -60,7 +60,7 @@
     box-shadow: 0 4px 24px rgba(0,0,0,.08);
     transition: width .6s ease, height .6s ease;
   }
-  body.is-playing .avatar-stage { width: 150px; height: 150px; }
+  body.is-playing .avatar-stage { width: 200px; height: 200px; }
   .avatar-stage video {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
@@ -87,7 +87,7 @@
     color: #202124;
   }
   h1 .leaf { color: #d64545; }
-  body.is-playing h1 { font-size: 36px; }
+  body.is-playing h1 { font-size: 44px; }
   .sub {
     margin-top: 10px;
     font-size: 18px;
@@ -110,10 +110,10 @@
     transform: translateY(0);
   }
   .transcript {
-    max-height: 460px;
+    max-height: 480px;
     overflow-y: auto;
-    font-size: 26px;
-    line-height: 1.6;
+    font-size: 32px;
+    line-height: 1.5;
     padding-right: 16px;
     scrollbar-width: none;
   }
@@ -159,7 +159,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v26';
+  var RECEIVER_VERSION = 'js-v27';
   var hintEl = document.getElementById('hint');
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
