@@ -73,6 +73,7 @@
   #title .leaf { color: #d64545; }
   body.is-playing #title {
     top: 5vh;
+    left: 516px;
     transform: none;
     font-size: 66px;
   }
@@ -231,7 +232,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v56';
+  var RECEIVER_VERSION = 'js-v57';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -338,12 +339,7 @@
     var meta = document.querySelector('.meta');
     var r1 = wrap.getBoundingClientRect();
     document.body.classList.add('is-playing');
-    // Title moves via CSS transition; align its left with meta content
-    var titleEl = document.getElementById('title');
-    requestAnimationFrame(function () {
-      // getBoundingClientRect is viewport-relative, matching absolute positioning
-      titleEl.style.left = meta.getBoundingClientRect().left + 'px';
-    });
+    // Title moves via CSS transition (left set in CSS)
     var r2 = wrap.getBoundingClientRect();
     var dx = r1.left - r2.left, dy = r1.top - r2.top;
     var sx = r1.width / r2.width, sy = r1.height / r2.height;
