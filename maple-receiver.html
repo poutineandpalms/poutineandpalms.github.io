@@ -36,11 +36,27 @@
   body:not(.is-playing) {
     justify-content: center;
   }
+  body:not(.is-playing) {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3vh;
+  }
+  body:not(.is-playing) #splash-title {
+    position: static;
+    transform: none;
+    font-size: clamp(40px, 8vh, 64px);
+  }
   body:not(.is-playing) .avatar-wrap {
-    width: 360px; height: 360px;
-    top: 168px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: static;
+    transform: none;
+    width: min(360px, 52vh);
+    height: min(360px, 52vh);
+    margin: 0;
+  }
+  body:not(.is-playing) .avatar-stage {
+    width: min(240px, 36vh);
+    height: min(240px, 36vh);
   }
   body:not(.is-playing) .meta {
     display: none;
@@ -93,6 +109,7 @@
     overflow: hidden;
     background: #fff;
     z-index: 1;
+    border: 2px solid #e0e0e0;
     box-shadow: 0 4px 24px rgba(0,0,0,.08);
     transition: width .6s ease, height .6s ease;
   }
@@ -210,7 +227,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v43';
+  var RECEIVER_VERSION = 'js-v44';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
