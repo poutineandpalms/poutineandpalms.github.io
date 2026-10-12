@@ -50,13 +50,13 @@
   body:not(.is-playing) .avatar-wrap {
     position: static;
     transform: none;
-    width: min(360px, 52vh);
-    height: min(360px, 52vh);
+    width: min(480px, 62vh);
+    height: min(480px, 62vh);
     margin: 0;
   }
   body:not(.is-playing) .avatar-stage {
-    width: min(240px, 36vh);
-    height: min(240px, 36vh);
+    width: min(300px, 42vh);
+    height: min(300px, 42vh);
   }
   body:not(.is-playing) .meta {
     display: none;
@@ -227,7 +227,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v44';
+  var RECEIVER_VERSION = 'js-v45';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
