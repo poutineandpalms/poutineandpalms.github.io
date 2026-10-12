@@ -38,8 +38,9 @@
   }
   body:not(.is-playing) .avatar-wrap {
     width: 360px; height: 360px;
-    margin: 0 auto;
-    top: 59%;
+    top: 168px;
+    left: 50%;
+    transform: translateX(-50%);
   }
   body:not(.is-playing) .meta {
     display: none;
@@ -209,7 +210,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v42';
+  var RECEIVER_VERSION = 'js-v43';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
