@@ -159,7 +159,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v27';
+  var RECEIVER_VERSION = 'js-v28';
   var hintEl = document.getElementById('hint');
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
@@ -282,7 +282,7 @@
     var wordCount = 0;
     sentences.forEach(function (s) {
       var words = s.trim().split(/\s+/);
-      if (wordCount + words.length > 12 && current.length > 0) {
+      if (wordCount + words.length > 7 && current.length > 0) {
         lines.push(current.join(' '));
         current = []; wordCount = 0;
       }
@@ -298,16 +298,11 @@
       a.src = url;
       a.onended = function () { setPlayingUI(false); };
       a.onplaying = function () {
-        // audio actually started -> spin-up burst, then settle to talking
-        if (thinkingTimeout) { clearTimeout(thinkingTimeout); }
-        document.body.classList.add('is-spinning-up');
-      setOrbitState('spinup');
+        // audio is ACTUALLY playing -> sync highlight to this exact moment
+        if (thinkingTimeout) { clearTimeout(thinkingTimeout); thinkingTimeout = null; }
+        document.body.classList.remove('is-spinning-up');
         document.body.classList.remove('is-thinking');
-        setAvatarMode('speaking');
-        thinkingTimeout = setTimeout(function () {
-          document.body.classList.remove('is-spinning-up');
-          setPlayingUI(true);
-        }, 3200);
+        setPlayingUI(true); // starts highlight driver in sync
       };
       var p = a.play();
       if (p && p.catch) p.catch(function () {});
@@ -335,15 +330,16 @@
       transcriptEl.scrollTop = 0;
     }
     if (d.audio_url) {
-      // thinking -> spin-up burst -> steady talking
+      // thinking until audio actually plays (onplaying -> setPlayingUI)
       setThinkingUI();
       if (thinkingTimeout) clearTimeout(thinkingTimeout);
       document.body.classList.add('is-spinning-up');
       setOrbitState('spinup');
+      // safety: if onplaying never fires, don't stay stuck in thinking
       thinkingTimeout = setTimeout(function () {
         document.body.classList.remove('is-spinning-up');
-        setPlayingUI(true); // setPlayingUI sets talking speed
-      }, 3200);
+        setPlayingUI(true);
+      }, 8000);
       playAudio(d.audio_url);
     }
   }
