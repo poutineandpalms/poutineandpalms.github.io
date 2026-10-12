@@ -37,18 +37,19 @@
     justify-content: center;
   }
   body:not(.is-playing) .avatar-wrap {
-    width: 380px; height: 380px;
+    width: 360px; height: 360px;
     margin: 0 auto;
+    top: 59%;
   }
   body:not(.is-playing) .meta {
     display: none;
   }
   #splash-title {
     position: absolute;
-    top: 64px;
+    top: 72px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 64px;
+    font-size: 56px;
     font-weight: 700;
     color: #202124;
     white-space: nowrap;
@@ -208,7 +209,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v41';
+  var RECEIVER_VERSION = 'js-v42';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -309,45 +310,41 @@
     step();
   }
 
+  function flipToPlaying() {
+    if (document.body.classList.contains('is-playing')) return;
+    var wrap = document.getElementById('avatar-wrap');
+    var splashTitle = document.getElementById('splash-title');
+    var metaTitle = document.getElementById('title');
+    var r1 = wrap.getBoundingClientRect();
+    var t1 = splashTitle.getBoundingClientRect();
+    document.body.classList.add('is-playing');
+    var r2 = wrap.getBoundingClientRect();
+    var t2 = metaTitle.getBoundingClientRect();
+    var dx = r1.left - r2.left, dy = r1.top - r2.top;
+    var sx = r1.width / r2.width, sy = r1.height / r2.height;
+    wrap.style.transition = 'none';
+    wrap.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
+    wrap.style.transformOrigin = 'center';
+    var tdx = t1.left + t1.width/2 - (t2.left + t2.width/2);
+    var tdy = t1.top + t1.height/2 - (t2.top + t2.height/2);
+    var tsx = t1.width / t2.width;
+    splashTitle.style.transition = 'none';
+    splashTitle.style.transform = 'translate(-50%, 0) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')';
+    splashTitle.style.transformOrigin = 'center';
+    void wrap.offsetHeight;
+    wrap.style.transition = 'transform .9s cubic-bezier(.22,.8,.3,1)';
+    splashTitle.style.transition = 'transform .9s cubic-bezier(.22,.8,.3,1), opacity .3s ease .7s';
+    wrap.style.transform = 'translate(0,0) scale(1,1)';
+    splashTitle.style.transform = 'translate(-50%, 0) translate(0,0) scale(1)';
+    splashTitle.style.opacity = '0';
+    setTimeout(function () {
+      wrap.style.transform = ''; wrap.style.transition = '';
+      splashTitle.style.display = 'none';
+    }, 950);
+  }
   function setPlayingUI(playing) {
     setOrbitState(playing ? 'talking' : 'idle');
-    if (playing && !document.body.classList.contains('is-playing')) {
-      // FLIP: avatar from centered splash to left playing position
-      var wrap = document.getElementById('avatar-wrap');
-      var splashTitle = document.getElementById('splash-title');
-      var metaTitle = document.getElementById('title');
-      var r1 = wrap.getBoundingClientRect();
-      var t1 = splashTitle.getBoundingClientRect();
-      document.body.classList.add('is-playing');
-      // meta is now visible, measure target positions
-      var r2 = wrap.getBoundingClientRect();
-      var t2 = metaTitle.getBoundingClientRect();
-      // FLIP avatar
-      var dx = r1.left - r2.left, dy = r1.top - r2.top;
-      var sx = r1.width / r2.width, sy = r1.height / r2.height;
-      wrap.style.transition = 'none';
-      wrap.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
-      wrap.style.transformOrigin = 'center';
-      // FLIP splash title to meta title position
-      var tdx = t1.left + t1.width/2 - (t2.left + t2.width/2);
-      var tdy = t1.top + t1.height/2 - (t2.top + t2.height/2);
-      var tsx = t1.width / t2.width;
-      splashTitle.style.transition = 'none';
-      splashTitle.style.transform = 'translate(-50%, 0) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')';
-      splashTitle.style.transformOrigin = 'center';
-      void wrap.offsetHeight; // reflow
-      wrap.style.transition = 'transform .9s cubic-bezier(.22,.8,.3,1)';
-      splashTitle.style.transition = 'transform .9s cubic-bezier(.22,.8,.3,1), opacity .3s ease .7s';
-      wrap.style.transform = 'translate(0,0) scale(1,1)';
-      splashTitle.style.transform = 'translate(-50%, 0) translate(0,0) scale(1)';
-      splashTitle.style.opacity = '0';
-      setTimeout(function () {
-        wrap.style.transform = ''; wrap.style.transition = '';
-        splashTitle.style.display = 'none';
-      }, 950);
-    } else {
-      document.body.classList.toggle('is-playing', !!playing);
-    }
+    document.body.classList.toggle('is-playing', !!playing);
     document.body.classList.remove('is-idle');
     document.body.classList.remove('is-thinking');
     document.body.classList.remove('is-spinning-up');
@@ -451,6 +448,7 @@
     }
     if (d.audio_url) {
       // thinking until audio actually plays (onplaying -> setPlayingUI)
+      flipToPlaying();
       setThinkingUI();
       if (thinkingTimeout) clearTimeout(thinkingTimeout);
       document.body.classList.add('is-spinning-up');
