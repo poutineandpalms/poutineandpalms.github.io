@@ -121,28 +121,21 @@
   /* ---- text block ---- */
   .meta {
     flex: 1 1 auto;
-    max-width: 700px;
-    transition: max-width 0.6s ease;
-  }
-  .meta {
-    flex: 1 1 auto;
     max-width: 780px;
     text-align: left;
     display: none;
     flex-direction: column;
     min-height: 0;
     opacity: 0;
-    transform: translateX(60px);
     pointer-events: none;
   }
   body.is-playing .meta {
     display: flex;
     max-width: 780px;
     opacity: 1;
-    transform: translateX(0);
     pointer-events: auto;
     padding-top: 150px;
-    transition: opacity .8s ease 1.4s, transform .9s cubic-bezier(.22,.8,.3,1) 1.4s;
+    transition: opacity .8s ease 1.4s;
   }
   h1 {
     margin-top: 24px;
@@ -236,7 +229,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v48';
+  var RECEIVER_VERSION = 'js-v49';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
