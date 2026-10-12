@@ -72,8 +72,7 @@
   }
   #title .leaf { color: #d64545; }
   body.is-playing #title {
-    top: 9vh;
-    left: 52%;
+    top: 5vh;
     transform: none;
     font-size: 66px;
   }
@@ -135,7 +134,7 @@
   body.is-playing .meta {
     max-width: 780px;
     pointer-events: auto;
-    padding-top: 150px;
+    padding-top: 110px;
   }
   body.is-playing .meta.show {
     opacity: 1;
@@ -232,7 +231,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v54';
+  var RECEIVER_VERSION = 'js-v55';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -339,7 +338,11 @@
     var meta = document.querySelector('.meta');
     var r1 = wrap.getBoundingClientRect();
     document.body.classList.add('is-playing');
-    // Title moves via CSS transition (top/left/transform/font-size)
+    // Title moves via CSS transition; align its left with meta content
+    var titleEl = document.getElementById('title');
+    requestAnimationFrame(function () {
+      titleEl.style.left = meta.offsetLeft + 'px';
+    });
     var r2 = wrap.getBoundingClientRect();
     var dx = r1.left - r2.left, dy = r1.top - r2.top;
     var sx = r1.width / r2.width, sy = r1.height / r2.height;
