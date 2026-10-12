@@ -30,10 +30,9 @@
     flex: 0 0 auto;
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto;
-    padding-bottom: 70px;
-    transition: width .8s cubic-bezier(.22,.8,.3,1), height .8s cubic-bezier(.22,.8,.3,1), margin .9s cubic-bezier(.22,.8,.3,1), padding .8s ease;
+    transition: width .8s cubic-bezier(.22,.8,.3,1), height .8s cubic-bezier(.22,.8,.3,1), margin .9s cubic-bezier(.22,.8,.3,1);
   }
-  body.is-playing .avatar-wrap { width: 480px; height: 480px; margin: 0; padding-bottom: 0; }
+  body.is-playing .avatar-wrap { width: 480px; height: 480px; margin: 0; }
   .orbit-layer {
     position: absolute; inset: 0;
     pointer-events: none;
@@ -82,22 +81,25 @@
     transition: opacity 0.6s ease;
   }
   .avatar-stage video.active { opacity: 1; }
-  .splash-title {
+  #main-title {
     position: absolute;
-    bottom: 0;
-    left: 0; right: 0;
-    text-align: center;
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 84px;
     font-weight: 700;
     color: #202124;
     white-space: nowrap;
-    transition: opacity .5s ease, transform .7s ease;
+    z-index: 5;
+    transition: top .9s cubic-bezier(.22,.8,.3,1), left .9s cubic-bezier(.22,.8,.3,1),
+                transform .9s cubic-bezier(.22,.8,.3,1), font-size .9s ease;
   }
-  .splash-title .leaf { color: #d64545; }
-  body.is-playing .splash-title {
-    opacity: 0;
-    transform: translateY(24px);
-    pointer-events: none;
+  #main-title .leaf { color: #d64545; }
+  body.is-playing #main-title {
+    top: 64px;
+    left: 544px;
+    transform: none;
+    font-size: 66px;
   }
   /* ---- text block ---- */
   .meta {
@@ -185,6 +187,7 @@
 </style>
 </head>
 <body class="is-idle">
+  <h1 id="main-title">Maple <span class="leaf">🍁</span></h1>
   <div class="avatar-wrap" id="avatar-wrap">
     <div class="orbit-layer orbit-front" id="layer-front">
       <div class="spinner" data-mult="0.88"><div class="odot" style="width:30px;height:30px;margin:-15px 0 0 -15px;background:#d64545;transform:translateX(171px);box-shadow:0 0 14px 3px rgba(214,69,69,.6)"></div></div>
@@ -198,10 +201,8 @@
       <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
       <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
     </div>
-    <div class="splash-title" id="splash-title">Maple <span class="leaf">🍁</span></div>
   </div>
   <div class="meta">
-    <h1 id="title">Maple <span class="leaf">🍁</span></h1>
     <div class="sub" id="subtitle"></div>
     <div class="transcript-wrap" id="transcript-wrap">
       <div class="transcript" id="transcript"></div>
@@ -213,11 +214,11 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v37';
+  var RECEIVER_VERSION = 'js-v38';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
-  var titleEl = document.getElementById('title');
+  var titleEl = document.getElementById('main-title');
   var subEl = document.getElementById('subtitle');
   var transcriptEl = document.getElementById('transcript');
   var vidIdle = document.getElementById('vid-idle');
