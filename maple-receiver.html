@@ -26,17 +26,22 @@
   /* ---- avatar with orbit dots ---- */
   .avatar-wrap {
     position: relative;
-    width: 480px; height: 480px;
+    width: 320px; height: 320px;
     flex: 0 0 auto;
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto;
-    padding-bottom: 80px;
-    transition: width .6s ease, height .6s ease, margin .9s cubic-bezier(.22,.8,.3,1);
+    padding-bottom: 70px;
+    transition: width .8s cubic-bezier(.22,.8,.3,1), height .8s cubic-bezier(.22,.8,.3,1), margin .9s cubic-bezier(.22,.8,.3,1), padding .8s ease;
   }
-  body.is-playing .avatar-wrap { width: 480px; height: 480px; margin: 0; padding-bottom: 0; }
+  body.is-playing .avatar-wrap { width: 260px; height: 260px; margin: 0; padding-bottom: 0; }
   .orbit-layer {
     position: absolute; inset: 0;
     pointer-events: none;
+    transition: transform .8s cubic-bezier(.22,.8,.3,1);
+    transform-origin: center;
+  }
+  body.is-playing .orbit-layer {
+    transform: scale(0.82);
   }
   .orbit-front { z-index: 2; }
   .spinner { position: absolute; inset: 0; }
@@ -60,15 +65,15 @@
   body.is-playing .orbit-front .odot:nth-child(2) { transform: rotate(311deg) translateX(86px); }
   .avatar-stage {
     position: relative;
-    width: 300px; height: 300px;
+    width: 200px; height: 200px;
     border-radius: 50%;
     overflow: hidden;
     background: #fff;
     z-index: 1;
     box-shadow: 0 4px 24px rgba(0,0,0,.08);
-    transition: width .6s ease, height .6s ease;
+    transition: width .8s cubic-bezier(.22,.8,.3,1), height .8s cubic-bezier(.22,.8,.3,1);
   }
-  body.is-playing .avatar-stage { width: 300px; height: 300px; }
+  body.is-playing .avatar-stage { width: 170px; height: 170px; }
   .avatar-stage video {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
@@ -206,7 +211,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v35';
+  var RECEIVER_VERSION = 'js-v36';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
