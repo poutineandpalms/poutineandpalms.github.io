@@ -159,7 +159,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v24';
+  var RECEIVER_VERSION = 'js-v25';
   var hintEl = document.getElementById('hint');
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
@@ -177,8 +177,10 @@
   function initOrbit() {
     var els = document.querySelectorAll('.spinner');
     for (var i = 0; i < els.length; i++) {
-      // randomize starting angle so dots don't cluster
-      var startAngle = Math.random() * 360;
+      // jittered uniform: base 60° apart + ±18° random offset (no clumping, not mechanical)
+      var baseAngle = (360 / els.length) * i;
+      var jitter = (Math.random() * 36) - 18;
+      var startAngle = (baseAngle + jitter + 360) % 360;
       els[i].style.transform = 'rotate(' + startAngle + 'deg)';
       spinners.push({ el: els[i], mult: parseFloat(els[i].getAttribute('data-mult')) || 1, angle: startAngle });
     }
