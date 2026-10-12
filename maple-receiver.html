@@ -83,7 +83,7 @@
   .avatar-stage video.active { opacity: 1; }
   #main-title {
     position: absolute;
-    top: 48px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 84px;
@@ -96,7 +96,7 @@
   }
   #main-title .leaf { color: #d64545; }
   body.is-playing #main-title {
-    top: 64px;
+    top: 56px;
     left: 544px;
     transform: none;
     font-size: 66px;
@@ -119,6 +119,7 @@
     opacity: 1;
     transform: translateX(0);
     pointer-events: auto;
+    padding-top: 150px;
   }
     display: flex; flex-direction: column;
     min-height: 0;
@@ -214,7 +215,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v38';
+  var RECEIVER_VERSION = 'js-v39';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
