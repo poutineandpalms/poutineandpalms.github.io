@@ -46,7 +46,7 @@
   <h1>Maple Receiver — Nest Hub Preview</h1>
   <p>1024 × 600 · same proportions as your Hub</p>
   <div class="hub-frame">
-    <iframe id="preview" src="maple-receiver.html?demo=1" title="Maple receiver preview"></iframe>
+    <iframe id="preview" title="Maple receiver preview"></iframe>
   </div>
   <div class="controls">
     <button onclick="reload()">↻ Replay demo</button>
@@ -54,6 +54,8 @@
   </div>
   <p class="note">The demo auto-plays a sample voice note. Use your browser zoom (Cmd/Ctrl +) to inspect details. This replicates the Hub's 1024×600 viewport — what you see here is what the Hub renders.</p>
 <script>
+  // Load with cache-buster so preview always shows latest
+  document.getElementById('preview').src = 'maple-receiver.html?demo=1&t=' + Date.now();
   var frame = document.querySelector('.hub-frame');
   var fitted = true;
   function reload() {
