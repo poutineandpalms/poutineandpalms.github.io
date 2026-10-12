@@ -159,7 +159,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v25';
+  var RECEIVER_VERSION = 'js-v26';
   var hintEl = document.getElementById('hint');
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
@@ -173,7 +173,7 @@
   var spinners = [];
   var orbitVel = 15; // deg/sec, current (eased)
   var orbitTarget = 15; // deg/sec, target
-  var SPEEDS = { idle: 15, thinking: 55, spinup: 110, talking: 32 };
+  var SPEEDS = { idle: 15, thinking: 55, spinup: 140, talking: 32 };
   function initOrbit() {
     var els = document.querySelectorAll('.spinner');
     for (var i = 0; i < els.length; i++) {
@@ -307,7 +307,7 @@
         thinkingTimeout = setTimeout(function () {
           document.body.classList.remove('is-spinning-up');
           setPlayingUI(true);
-        }, 2200);
+        }, 3200);
       };
       var p = a.play();
       if (p && p.catch) p.catch(function () {});
@@ -343,7 +343,7 @@
       thinkingTimeout = setTimeout(function () {
         document.body.classList.remove('is-spinning-up');
         setPlayingUI(true); // setPlayingUI sets talking speed
-      }, 2200);
+      }, 3200);
       playAudio(d.audio_url);
     }
   }
