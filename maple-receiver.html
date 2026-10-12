@@ -118,6 +118,7 @@
     scrollbar-width: none;
   }
   .transcript::-webkit-scrollbar { display: none; }
+  .w { /* word span for line measurement */ }
   .tline {
     color: #b8b0a4; /* pale = not yet read */
     transition: color 0.5s ease;
@@ -129,6 +130,11 @@
     position: absolute; bottom: 20px; left: 0; right: 0;
     text-align: center;
     font-size: 13px; color: #c9c2b8; letter-spacing: 1px;
+  }
+  .version {
+    position: absolute; bottom: 12px; right: 16px;
+    font-size: 11px; color: #d8d2c8; letter-spacing: 0.5px;
+    background: rgba(0,0,0,0.04); padding: 2px 8px; border-radius: 4px;
   }
 </style>
 </head>
@@ -155,12 +161,14 @@
     </div>
   </div>
   <div class="hint" id="hint"></div>
+  <div class="version" id="version"></div>
   <audio id="fallback-audio" preload="none"></audio>
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v28';
+  var RECEIVER_VERSION = 'js-v29';
   var hintEl = document.getElementById('hint');
+  document.getElementById('version').textContent = RECEIVER_VERSION;
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
   var transcriptEl = document.getElementById('transcript');
@@ -274,22 +282,48 @@
     setAvatarMode('speaking');
   }
 
-  function splitIntoLines(text) {
-    // Split into sentences, then group into lines of ~10 words for Hub readability
-    var sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    var lines = [];
-    var current = [];
-    var wordCount = 0;
-    sentences.forEach(function (s) {
-      var words = s.trim().split(/\s+/);
-      if (wordCount + words.length > 7 && current.length > 0) {
-        lines.push(current.join(' '));
-        current = []; wordCount = 0;
-      }
-      current.push(s.trim()); wordCount += words.length;
+  function buildVisualLines(text) {
+    // Split into words, render, then group by actual visual line (offsetTop)
+    transcriptEl.innerHTML = '';
+    lineEls = [];
+    var words = text.split(/\s+/);
+    var wordSpans = [];
+    words.forEach(function (w, i) {
+      var s = document.createElement('span');
+      s.className = 'w';
+      s.textContent = w;
+      transcriptEl.appendChild(s);
+      transcriptEl.appendChild(document.createTextNode(' '));
+      wordSpans.push(s);
     });
-    if (current.length > 0) lines.push(current.join(' '));
-    return lines;
+    // Group words by visual line using offsetTop
+    var lines = [];
+    var currentLine = [];
+    var currentTop = null;
+    wordSpans.forEach(function (s) {
+      var top = s.offsetTop;
+      if (currentTop === null || Math.abs(top - currentTop) < 5) {
+        currentLine.push(s);
+      } else {
+        lines.push(currentLine);
+        currentLine = [s];
+      }
+      currentTop = top;
+    });
+    if (currentLine.length > 0) lines.push(currentLine);
+    // Wrap each visual line in a div for highlighting
+    transcriptEl.innerHTML = '';
+    lineEls = [];
+    lines.forEach(function (lineWords) {
+      var div = document.createElement('div');
+      div.className = 'tline';
+      lineWords.forEach(function (w, i) {
+        div.appendChild(w);
+        if (i < lineWords.length - 1) div.appendChild(document.createTextNode(' '));
+      });
+      transcriptEl.appendChild(div);
+      lineEls.push(div);
+    });
   }
 
   function playAudio(url) {
@@ -317,16 +351,7 @@
     if (d.title) titleEl.innerHTML = escapeHtml(d.title) + ' <span class="leaf">🍁</span>';
     if (d.subtitle) subEl.textContent = d.subtitle;
     if (d.text) {
-      var lines = splitIntoLines(d.text);
-      transcriptEl.innerHTML = '';
-      lineEls = [];
-      lines.forEach(function (ln) {
-        var div = document.createElement('div');
-        div.className = 'tline';
-        div.textContent = ln;
-        transcriptEl.appendChild(div);
-        lineEls.push(div);
-      });
+      buildVisualLines(d.text);
       transcriptEl.scrollTop = 0;
     }
     if (d.audio_url) {
