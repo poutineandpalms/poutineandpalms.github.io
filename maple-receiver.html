@@ -197,7 +197,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v59';
+  var RECEIVER_VERSION = 'js-v60';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -400,8 +400,13 @@
       };
       a.onplaying = function () {
         if (thinkingTimeout) { clearTimeout(thinkingTimeout); thinkingTimeout = null; }
-        setOrbitState('talking');
-        setPlayingUI(true);
+        // Ensure minimum 2.5s of fast spinup so it's visible (fast LAN loads audio quickly)
+        var elapsed = Date.now() - spinupStart;
+        var delay = Math.max(0, 2500 - elapsed);
+        setTimeout(function () {
+          setOrbitState('talking');
+          setPlayingUI(true);
+        }, delay);
       };
       var p = a.play();
       if (p && p.catch) p.catch(function () {});
@@ -415,6 +420,7 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  var spinupStart = 0;
   function handleMessage(d) {
     d = d || {};
     if (d.text && d.text === lastMsgText) return;
@@ -427,6 +433,7 @@
       setThinkingUI();
       if (thinkingTimeout) clearTimeout(thinkingTimeout);
       setOrbitState('spinup');
+      spinupStart = Date.now();
       thinkingTimeout = setTimeout(function () { setPlayingUI(true); }, 8000);
       playAudio(d.audio_url);
     }
