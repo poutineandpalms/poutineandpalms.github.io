@@ -17,6 +17,11 @@
     overflow: hidden;
     padding: 0 32px 0 24px;
     justify-content: flex-start;
+    transition: padding 0.6s ease, gap 0.6s ease;
+  }
+  body.is-playing {
+    padding-left: 12px;
+    gap: 24px;
   }
   /* ---- avatar with orbit dots ---- */
   .avatar-wrap {
@@ -74,6 +79,11 @@
   .meta {
     flex: 1 1 auto;
     max-width: 700px;
+    transition: max-width 0.6s ease;
+  }
+  body.is-playing .meta {
+    max-width: 780px;
+  }
     text-align: left;
     display: flex; flex-direction: column;
     min-height: 0;
@@ -169,7 +179,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v32';
+  var RECEIVER_VERSION = 'js-v33';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -186,7 +196,7 @@
   var spinners = [];
   var orbitVel = 15; // deg/sec, current (eased)
   var orbitTarget = 15; // deg/sec, target
-  var SPEEDS = { idle: 15, thinking: 55, spinup: 140, talking: 32 };
+  var SPEEDS = { idle: 15, thinking: 66, spinup: 168, talking: 38 };
   function initOrbit() {
     var els = document.querySelectorAll('.spinner');
     for (var i = 0; i < els.length; i++) {
