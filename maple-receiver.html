@@ -57,7 +57,7 @@
   body:not(.is-playing) .meta {
     display: none;
   }
-  #splash-title {
+  #title {
     position: absolute;
     top: 8vh;
     left: 50%;
@@ -67,12 +67,15 @@
     color: #202124;
     white-space: nowrap;
     z-index: 5;
-    transition: opacity .4s ease;
+    transition: top 1.35s ease-in-out, left 1.35s ease-in-out,
+                transform 1.35s ease-in-out, font-size 1.35s ease-in-out;
   }
-  #splash-title .leaf { color: #d64545; }
-  body.is-playing #splash-title {
-    opacity: 0;
-    pointer-events: none;
+  #title .leaf { color: #d64545; }
+  body.is-playing #title {
+    top: 9vh;
+    left: 52%;
+    transform: none;
+    font-size: 66px;
   }
   .orbit-layer {
     position: absolute; inset: 0;
@@ -202,7 +205,7 @@
 </style>
 </head>
 <body class="is-idle">
-  <h1 id="splash-title">Maple <span class="leaf">🍁</span></h1>
+  <h1 id="title">Maple <span class="leaf">🍁</span></h1>
   <div class="avatar-wrap" id="avatar-wrap">
     <div class="orbit-layer orbit-front" id="layer-front">
       <div class="spinner" data-mult="0.88"><div class="odot" style="width:30px;height:30px;margin:-15px 0 0 -15px;background:#d64545;transform:translateX(171px);box-shadow:0 0 14px 3px rgba(214,69,69,.6)"></div></div>
@@ -217,8 +220,7 @@
       <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
     </div>
   </div>
-  <div class="meta">
-    <h1 id="title">Maple <span class="leaf">🍁</span></h1>
+  <div class="meta">Maple <span class="leaf">🍁</span></h1>
     <div class="sub" id="subtitle">Ready</div>
     <div class="transcript-wrap" id="transcript-wrap">
       <div class="transcript" id="transcript"></div>
@@ -230,7 +232,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v52';
+  var RECEIVER_VERSION = 'js-v53';
   var castMgr = null;
   var hintEl = document.getElementById('hint');
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -334,41 +336,19 @@
   function flipToPlaying() {
     if (document.body.classList.contains('is-playing')) return;
     var wrap = document.getElementById('avatar-wrap');
-    var splashTitle = document.getElementById('splash-title');
-    var metaTitle = document.getElementById('title');
     var meta = document.querySelector('.meta');
-    // Measure starting positions (splash layout)
     var r1 = wrap.getBoundingClientRect();
-    var t1 = splashTitle.getBoundingClientRect();
-    // Switch to playing layout (avatar jumps to left, meta appears in layout but invisible)
     document.body.classList.add('is-playing');
+    // Title moves via CSS transition (top/left/transform/font-size)
     var r2 = wrap.getBoundingClientRect();
-    var t2 = metaTitle.getBoundingClientRect();
-    // Animate avatar from r1 to r2 using Web Animations API
     var dx = r1.left - r2.left, dy = r1.top - r2.top;
     var sx = r1.width / r2.width, sy = r1.height / r2.height;
     wrap.animate([
       { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' },
       { transform: 'translate(0,0) scale(1,1)' }
     ], { duration: 1350, easing: 'ease-in-out', fill: 'forwards' });
-    // Animate title from t1 to t2
-    var tdx = t2.left - t1.left, tdy = t2.top - t1.top;
-    var tsx = t2.width / t1.width;
-    // Keep splash title visible during flight (override the CSS opacity:0)
-    splashTitle.style.opacity = '1';
-    var titleAnim = splashTitle.animate([
-      { transform: 'translateX(-50%) translate(0px,0px) scale(1)', opacity: 1 },
-      { transform: 'translateX(-50%) translate(' + tdx + 'px,' + tdy + 'px) scale(' + tsx + ')', opacity: 1 }
-    ], { duration: 1350, easing: 'ease-in-out', fill: 'forwards' });
-    // After flight, fade out splash title (meta title is already in place underneath)
-    titleAnim.onfinish = function () {
-      splashTitle.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' })
-        .onfinish = function () { splashTitle.style.display = 'none'; };
-    };
-    // Show meta (transcript) ONLY after avatar finishes (1.4s)
-    setTimeout(function () {
-      meta.classList.add('show');
-    }, 1400);
+    // Show meta (transcript) after avatar finishes
+    setTimeout(function () { meta.classList.add('show'); }, 1400);
   }
   function setPlayingUI(playing) {
     setOrbitState(playing ? 'talking' : 'idle');
@@ -378,8 +358,6 @@
     document.body.classList.remove('is-spinning-up');
     setAvatarMode(playing ? 'speaking' : 'idle');
     if (!playing) {
-      var st = document.getElementById('splash-title');
-      if (st) { st.style.display = ''; st.style.opacity = ''; }
       var m = document.querySelector('.meta');
       if (m) m.classList.remove('show');
       document.body.classList.remove('is-playing');
