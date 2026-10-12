@@ -126,6 +126,9 @@
     opacity: 0;
     pointer-events: none;
   }
+  body:not(.is-playing) .meta {
+    display: none;
+  }
   body.is-playing .meta {
     pointer-events: auto;
     padding-top: 11vh;
@@ -194,7 +197,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v58';
+  var RECEIVER_VERSION = 'js-v59';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
