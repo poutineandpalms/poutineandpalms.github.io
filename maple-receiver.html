@@ -166,7 +166,7 @@
 <script>
 (function () {
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v22';
+  var RECEIVER_VERSION = 'js-v23';
   var hintEl = document.getElementById('hint');
   var titleEl = document.getElementById('title');
   var subEl = document.getElementById('subtitle');
@@ -189,19 +189,11 @@
       els[i].style.transform = 'rotate(' + startAngle + 'deg)';
       spinners.push({ el: els[i], mult: parseFloat(els[i].getAttribute('data-mult')) || 1, angle: startAngle });
     }
-    var last = performance.now();
-    var tick = function (now) {
-      var dt = Math.min(0.05, (now - last) / 1000); last = now;
-      // ease velocity toward target (smooth spin-up/down)
-      orbitVel += (orbitTarget - orbitVel) * 0.04;
-      for (var j = 0; j < spinners.length; j++) {
-        var s = spinners[j];
-        s.angle = (s.angle + orbitVel * s.mult * dt) % 360;
-        s.el.style.transform = 'rotate(' + s.angle + 'deg)';
-      }
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    // v23 DEBUG: animation disabled, dots static at spread angles
+    var fixedAngles = [10, 80, 150, 210, 280, 340];
+    for (var k = 0; k < spinners.length; k++) {
+      spinners[k].el.style.transform = 'rotate(' + fixedAngles[k % fixedAngles.length] + 'deg)';
+    }
   }
   function setOrbitState(state) {
     orbitTarget = SPEEDS[state] || SPEEDS.idle;
