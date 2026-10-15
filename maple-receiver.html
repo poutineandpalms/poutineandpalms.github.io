@@ -235,7 +235,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v78';
+  var RECEIVER_VERSION = 'js-v79';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -306,7 +306,10 @@
       requestAnimationFrame(tick);
     })(last);
   }
-  function setOrbitState(state) { orbitTarget = SPEEDS[state] || SPEEDS.idle; }
+  function setOrbitState(state) {
+    orbitTarget = SPEEDS[state] || SPEEDS.idle;
+    if (state === 'spinup') orbitVel = Math.max(orbitVel, SPEEDS.thinking);
+  }
 
   /* ===== Avatar videos ===== */
   function setAvatarMode(mode) {
