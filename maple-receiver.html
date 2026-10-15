@@ -123,6 +123,16 @@
     pointer-events: none;
     --orbit-r: calc(var(--avatar-size) * 0.36);
   }
+  /* v72 (Alex): explosion slow-mo — orbits burst PAST the avatar then settle.
+     Transform-only, no opacity, safe for the Hub. */
+  .avatar-wrap.ready .orbit-layer {
+    animation: orbit-burst 1.0s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes orbit-burst {
+    0% { transform: scale(0.2); }
+    45% { transform: scale(1.45); }
+    100% { transform: scale(1); }
+  }
   .orbit-front { z-index: 2; }
   .spinner { position: absolute; inset: 0; }
   .odot {
@@ -213,7 +223,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v71';
+  var RECEIVER_VERSION = 'js-v72';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
