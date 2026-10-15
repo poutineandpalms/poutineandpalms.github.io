@@ -163,8 +163,8 @@
     transition: color 0.5s ease;
     margin-bottom: 1vh;
   }
-  .tline.current { color: var(--ink); font-weight: 500; }
-  .tline.read { color: var(--ink-soft); }
+  .tline.current { color: var(--ink); }
+  .tline.read { color: var(--ink); }
 
   .version {
     position: absolute; bottom: 12px; right: 16px;
@@ -197,7 +197,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v60';
+  var RECEIVER_VERSION = 'js-v61';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -289,8 +289,9 @@
         var p = Math.min(1, Math.max(0, pos.time / pos.duration));
         var idx = Math.min(lineEls.length - 1, Math.floor(p * lineEls.length));
         for (var i = 0; i < lineEls.length; i++) {
-          lineEls[i].classList.toggle('current', i === idx);
-          lineEls[i].classList.toggle('read', i < idx);
+          // Progressive: once dark, stays dark (forgiving of sync drift)
+          lineEls[i].classList.toggle('current', i <= idx);
+          lineEls[i].classList.remove('read');
         }
         var cur = lineEls[idx];
         if (cur) {
@@ -363,7 +364,12 @@
       wrapEl.style.transform = to;
       setTimeout(function () { wrapEl.style.transition = ''; wrapEl.style.transform = ''; }, 1400);
     }
-    setTimeout(function () { metaEl.classList.add('show'); }, 1400);
+    setTimeout(function () {
+      metaEl.classList.add('show');
+      // Build transcript lines NOW so text is visible before audio starts
+      if (pendingText) { buildVisualLines(pendingText); pendingText = null; }
+      transcriptEl.scrollTop = 0;
+    }, 1400);
   }
 
   /* ===== UI states ===== */
@@ -379,8 +385,8 @@
       document.documentElement.style.setProperty('--title-tx', '-50%');
       if (scrollRaf) { cancelAnimationFrame(scrollRaf); scrollRaf = null; }
     } else {
+      // Lines already built in flipToPlaying; just start the highlight driver
       if (pendingText) { buildVisualLines(pendingText); pendingText = null; }
-      transcriptEl.scrollTop = 0;
       driveHighlight();
     }
   }
@@ -435,7 +441,9 @@
       setOrbitState('spinup');
       spinupStart = Date.now();
       thinkingTimeout = setTimeout(function () { setPlayingUI(true); }, 8000);
-      playAudio(d.audio_url);
+      // Start audio AFTER transcript is visible (not before)
+      var audioUrl = d.audio_url;
+      setTimeout(function () { playAudio(audioUrl); }, 1600);
     }
   }
 
