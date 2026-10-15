@@ -82,7 +82,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
   }
+  .avatar-wrap.ready { opacity: 1; }
   .avatar-stage {
     position: relative;
     width: var(--avatar-img);
@@ -197,7 +200,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v61';
+  var RECEIVER_VERSION = 'js-v62';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -263,12 +266,29 @@
   /* ===== Avatar videos ===== */
   function setAvatarMode(mode) {
     var idle = mode !== 'speaking';
-    vidIdle.classList.toggle('active', idle);
-    vidSpeaking.classList.toggle('active', !idle);
     var show = idle ? vidIdle : vidSpeaking;
     var hide = idle ? vidSpeaking : vidIdle;
-    if (show.paused) { var p = show.play(); if (p && p.catch) p.catch(function () {}); }
-    hide.pause();
+    function doSwap() {
+      vidIdle.classList.toggle('active', idle);
+      vidSpeaking.classList.toggle('active', !idle);
+      if (show.paused) { var p = show.play(); if (p && p.catch) p.catch(function () {}); }
+      hide.pause();
+    }
+    if (!idle && show.readyState < 2) {
+      /* Speaking video has no decoded frame yet — keep idle visible (no black),
+         start buffering, then crossfade the moment frame data arrives. */
+      var done = false;
+      var finish = function () {
+        if (done) return; done = true;
+        show.removeEventListener('canplay', finish);
+        doSwap();
+      };
+      show.addEventListener('canplay', finish);
+      setTimeout(finish, 3000); /* fallback: never stall the transition */
+      if (show.paused) { var p0 = show.play(); if (p0 && p0.catch) p0.catch(function () {}); }
+      return;
+    }
+    doSwap();
   }
 
   /* ===== Transcript highlighting ===== */
@@ -448,6 +468,16 @@
   }
 
   initOrbit();
+
+  /* Fade in avatar + orbit only once the idle video is ready (no white-disc flash) */
+  function markAvatarReady() { wrapEl.classList.add('ready'); }
+  if (vidIdle.readyState >= 2) markAvatarReady();
+  else {
+    vidIdle.addEventListener('canplay', markAvatarReady, { once: true });
+    setTimeout(markAvatarReady, 5000); /* fallback: never leave it invisible */
+  }
+  /* Pre-buffer the speaking video at startup so the swap never shows black */
+  try { vidSpeaking.load(); } catch (e) {}
 
   /* ===== Demo mode ===== */
   var isDemo = location.search.indexOf('demo=1') >= 0;
