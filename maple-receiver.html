@@ -74,6 +74,9 @@
   }
 
   /* ===== Avatar with orbit dots ===== */
+  /* v70 (Alex): initial appearance is a scale pop — transform only, no opacity.
+     Circle outline + orbits live inside the wrap, so they pop in together with
+     the video, only when the video is actually ready. */
   .avatar-wrap {
     position: relative;
     width: var(--avatar-size);
@@ -82,10 +85,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    transition: opacity 0.8s ease;
+    transform: scale(0);
+    transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .avatar-wrap.ready { opacity: 1; }
+  .avatar-wrap.ready { transform: scale(1); }
   .avatar-stage {
     position: relative;
     width: var(--avatar-img);
@@ -219,7 +222,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v69';
+  var RECEIVER_VERSION = 'js-v70';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -245,7 +248,6 @@
         if (p && p.catch) p.catch(function () {});
       } catch (e) {}
     });
-    setTimeout(function () { imgIdle.classList.add('gone'); }, 2500);
     setTimeout(function () { imgSpeaking.classList.add('gone'); }, 2500);
   }
 
@@ -489,11 +491,21 @@
 
   initOrbit();
 
-  /* v68: poster images load instantly — fade the avatar in on window load. */
-  function markAvatarReady() { wrapEl.classList.add('ready'); }
-  if (document.readyState === 'complete') markAvatarReady();
-  else window.addEventListener('load', markAvatarReady);
-  setTimeout(markAvatarReady, 3000); /* fallback */
+  /* v70: pop the whole avatar (video + outline + orbits) only when the idle
+     video can actually play. Poster hard-hides right after the pop. */
+  function markAvatarReady() {
+    wrapEl.classList.add('ready');
+    setTimeout(function () { imgIdle.classList.add('gone'); }, 600);
+  }
+  (function waitForIdle() {
+    var done = false;
+    var go = function () { if (!done) { done = true; markAvatarReady(); } };
+    try {
+      if (vidIdle.readyState >= 3) go();
+      else vidIdle.addEventListener('canplay', go, { once: true });
+    } catch (e) { go(); }
+    setTimeout(go, 4000); /* fallback: never leave it invisible */
+  })();
   kickVideos();
 
   /* ===== Demo mode ===== */
