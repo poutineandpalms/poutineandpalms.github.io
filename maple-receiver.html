@@ -200,7 +200,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v62';
+  var RECEIVER_VERSION = 'js-v63';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -274,16 +274,29 @@
       if (show.paused) { var p = show.play(); if (p && p.catch) p.catch(function () {}); }
       hide.pause();
     }
-    if (!idle && show.readyState < 2) {
-      /* Speaking video has no decoded frame yet — keep idle visible (no black),
-         start buffering, then crossfade the moment frame data arrives. */
+    /* Crossfade only once the incoming video has actually presented a frame.
+       canplay/readyState>=2 still leave a black <video> element on screen. */
+    var hasFrame = false;
+    try {
+      if (show.requestVideoFrameCallback) {
+        /* Ask for one frame callback; if a frame was already presented it fires immediately */
+        show.requestVideoFrameCallback(function () { hasFrame = true; });
+      } else {
+        hasFrame = show.readyState >= 3;
+      }
+    } catch (e) { hasFrame = show.readyState >= 3; }
+    if (!idle && !hasFrame) {
+      /* Speaking video has no presented frame yet — keep idle visible (no black),
+         start buffering, then crossfade the moment a frame hits the screen. */
       var done = false;
       var finish = function () {
         if (done) return; done = true;
-        show.removeEventListener('canplay', finish);
         doSwap();
       };
-      show.addEventListener('canplay', finish);
+      try {
+        if (show.requestVideoFrameCallback) show.requestVideoFrameCallback(function () { finish(); });
+        else show.addEventListener('canplaythrough', finish, { once: true });
+      } catch (e) { /* fall through to timeout */ }
       setTimeout(finish, 3000); /* fallback: never stall the transition */
       if (show.paused) { var p0 = show.play(); if (p0 && p0.catch) p0.catch(function () {}); }
       return;
@@ -469,13 +482,24 @@
 
   initOrbit();
 
-  /* Fade in avatar + orbit only once the idle video is ready (no white-disc flash) */
+  /* Fade in avatar + orbit only once a real frame is on screen (no white disc, no black disc).
+     requestVideoFrameCallback fires when a frame is actually presented — canplay is not enough. */
   function markAvatarReady() { wrapEl.classList.add('ready'); }
-  if (vidIdle.readyState >= 2) markAvatarReady();
-  else {
-    vidIdle.addEventListener('canplay', markAvatarReady, { once: true });
-    setTimeout(markAvatarReady, 5000); /* fallback: never leave it invisible */
+  function waitForFirstFrame(video, cb) {
+    var done = false;
+    var finish = function () { if (!done) { done = true; cb(); } };
+    try {
+      if (video.requestVideoFrameCallback) {
+        video.requestVideoFrameCallback(function () { finish(); });
+      } else if (video.readyState >= 3) {
+        finish();
+      } else {
+        video.addEventListener('canplaythrough', finish, { once: true });
+      }
+    } catch (e) { finish(); }
+    setTimeout(finish, 6000); /* fallback: never leave it invisible */
   }
+  waitForFirstFrame(vidIdle, markAvatarReady);
   /* Pre-buffer the speaking video at startup so the swap never shows black */
   try { vidSpeaking.load(); } catch (e) {}
 
