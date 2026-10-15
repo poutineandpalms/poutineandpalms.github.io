@@ -235,7 +235,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v81';
+  var RECEIVER_VERSION = 'js-v82';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -513,6 +513,69 @@
       playAudio(lastAudioUrl);
     }
   });
+
+  /* v82 (Alex's crazy idea): tap anywhere else -> a dot spawns under your
+     finger, arcs over to the avatar, and joins the orbit. */
+  var tappedDots = 0;
+  document.addEventListener('click', function (e) {
+    if (wrapEl.contains(e.target)) return; /* avatar tap = replay */
+    if (spinners.length >= 20) return; /* sanity cap */
+    spawnOrbitDot(e.clientX, e.clientY);
+  });
+  function spawnOrbitDot(x, y) {
+    var palette = [
+      { color: '#d64545', glow: 'rgba(214,69,69,.6)' },
+      { color: '#ffb300', glow: 'rgba(255,179,0,.55)' },
+      { color: '#e53935', glow: 'rgba(229,57,53,.6)' },
+      { color: '#ff8f00', glow: 'rgba(255,143,0,.55)' }
+    ];
+    var c = palette[Math.floor(Math.random() * palette.length)];
+    var size = 14 + Math.random() * 12;
+    var layer = document.getElementById('layer-front');
+    var orbitR = parseFloat(getComputedStyle(layer).getPropertyValue('--orbit-r')) || 100;
+    var r = wrapEl.getBoundingClientRect();
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    var dx = x - cx, dy = y - cy;
+    var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    var joinAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+    var tx = cx + (dx / dist) * orbitR, ty = cy + (dy / dist) * orbitR;
+    /* arc control point: perpendicular offset for a nice curve */
+    var mx = (x + tx) / 2, my = (y + ty) / 2;
+    var nx = -(ty - y), ny = (tx - x);
+    var nl = Math.sqrt(nx * nx + ny * ny) || 1;
+    var arc = dist * 0.25;
+    var qx = mx + (nx / nl) * arc, qy = my + (ny / nl) * arc;
+    var dot = document.createElement('div');
+    dot.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;' +
+      'width:' + size + 'px;height:' + size + 'px;margin:' + (-size / 2) + 'px;' +
+      'border-radius:50%;background:' + c.color + ';z-index:50;pointer-events:none;' +
+      'box-shadow:0 0 12px 3px ' + c.glow + ';';
+    document.body.appendChild(dot);
+    var frames = [];
+    for (var i = 0; i <= 24; i++) {
+      var t = i / 24, u = 1 - t;
+      var px = u * u * x + 2 * u * t * qx + t * t * tx;
+      var py = u * u * y + 2 * u * t * qy + t * t * ty;
+      frames.push({ transform: 'translate(' + (px - x) + 'px,' + (py - y) + 'px) scale(' + (0.2 + 0.8 * t) + ')' });
+    }
+    var anim = dot.animate(frames, { duration: 900, easing: 'cubic-bezier(0.22,1,0.36,1)', fill: 'forwards' });
+    anim.onfinish = function () {
+      dot.remove();
+      var spinner = document.createElement('div');
+      spinner.className = 'spinner';
+      var od = document.createElement('div');
+      od.className = 'odot';
+      od.style.cssText = 'width:' + size + 'px;height:' + size + 'px;' +
+        'margin:' + (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px;' +
+        'background:' + c.color + ';transform:translateX(var(--orbit-r));' +
+        'box-shadow:0 0 12px 3px ' + c.glow + ';';
+      spinner.appendChild(od);
+      layer.appendChild(spinner);
+      spinner.style.transform = 'rotate(' + joinAngle + 'deg)';
+      spinners.push({ el: spinner, mult: 0.9 + Math.random() * 0.25, angle: joinAngle });
+      tappedDots++;
+    };
+  }
 
   /* v71: pop the avatar (video + outline + orbits) when the video can play.
      Poster hard-hides right after the pop. */
