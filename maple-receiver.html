@@ -133,6 +133,17 @@
     45% { transform: scale(1.45); }
     100% { transform: scale(1); }
   }
+  /* v73 (Alex): breathing orbit — the whole orbit system gently expands and
+     contracts like a slow fluid heartbeat, continuously. Transform-only. */
+  .orbit-breathe {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    animation: orbit-breathe 5.5s ease-in-out infinite;
+  }
+  @keyframes orbit-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.14); }
+  }
   .orbit-front { z-index: 2; }
   .spinner { position: absolute; inset: 0; }
   .odot {
@@ -202,7 +213,7 @@
   <div class="stage" id="stage">
     <h1 id="title">Maple <span class="leaf">🍁</span></h1>
     <div class="avatar-wrap" id="avatar-wrap">
-      <div class="orbit-layer orbit-front" id="layer-front"><!-- dots injected by JS --></div>
+      <div class="orbit-breathe"><div class="orbit-layer orbit-front" id="layer-front"><!-- dots injected by JS --></div></div>
       <div class="avatar-stage">
         <div class="avatar-slot" id="slot-avatar">
           <video id="vid-avatar" src="maple-avatar.mp4" muted loop playsinline autoplay></video>
@@ -223,7 +234,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v72';
+  var RECEIVER_VERSION = 'js-v73';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
