@@ -138,6 +138,7 @@
   .orbit-breathe {
     position: absolute; inset: 0;
     pointer-events: none;
+    z-index: 2;
     animation: orbit-breathe 5.5s ease-in-out infinite;
   }
   @keyframes orbit-breathe {
@@ -234,7 +235,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v75';
+  var RECEIVER_VERSION = 'js-v76';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
