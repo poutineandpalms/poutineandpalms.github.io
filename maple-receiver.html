@@ -183,8 +183,8 @@
     <div class="avatar-wrap" id="avatar-wrap">
       <div class="orbit-layer orbit-front" id="layer-front"><!-- dots injected by JS --></div>
       <div class="avatar-stage">
-        <video id="vid-idle" class="active" src="maple-idle.mp4" muted loop playsinline autoplay></video>
-        <video id="vid-speaking" src="maple-speaking.mp4" muted loop playsinline preload="auto"></video>
+        <video id="vid-idle" class="active" src="maple-idle.mp4" poster="maple-idle-poster.jpg" muted loop playsinline autoplay></video>
+        <video id="vid-speaking" src="maple-speaking.mp4" poster="maple-speaking-poster.jpg" muted loop playsinline preload="auto"></video>
       </div>
     </div>
     <div class="meta" id="meta">
@@ -200,7 +200,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v64';
+  var RECEIVER_VERSION = 'js-v65';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -271,8 +271,11 @@
     function doSwap() {
       vidIdle.classList.toggle('active', idle);
       vidSpeaking.classList.toggle('active', !idle);
-      if (show.paused) { var p = show.play(); if (p && p.catch) p.catch(function () {}); }
-      hide.pause();
+      /* Keep BOTH videos playing: pausing drops the compositor frame on the Hub
+         and the element renders black until it decodes again. Muted loops are cheap. */
+      [vidIdle, vidSpeaking].forEach(function (v) {
+        if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      });
     }
     /* Crossfade only once the incoming video has actually presented a frame.
        canplay/readyState>=2 still leave a black <video> element on screen. */
@@ -500,8 +503,13 @@
     setTimeout(finish, 6000); /* fallback: never leave it invisible */
   }
   waitForFirstFrame(vidIdle, markAvatarReady);
-  /* Pre-buffer the speaking video at startup so the swap never shows black */
-  try { vidSpeaking.load(); } catch (e) {}
+  /* Pre-play the speaking video at startup (muted, hidden) so a live frame
+     exists long before any swap. Poster covers the initial load. */
+  try {
+    vidSpeaking.load();
+    var sp = vidSpeaking.play();
+    if (sp && sp.catch) sp.catch(function () {});
+  } catch (e) {}
 
   /* ===== Demo mode ===== */
   var isDemo = location.search.indexOf('demo=1') >= 0;
