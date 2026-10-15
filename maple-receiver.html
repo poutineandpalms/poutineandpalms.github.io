@@ -235,7 +235,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v80';
+  var RECEIVER_VERSION = 'js-v81';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -472,6 +472,8 @@
     });
   }
   var spinupStart = 0;
+  var lastAudioUrl = null;
+  var lastMsgData = null;
   function handleMessage(d) {
     d = d || {};
     if (d.text && d.text === lastMsgText) return;
@@ -480,6 +482,8 @@
     if (d.subtitle) subEl.textContent = d.subtitle;
     if (d.text) pendingText = d.text;
     if (d.audio_url) {
+      lastAudioUrl = d.audio_url;
+      lastMsgData = d;
       flipToPlaying();
       setThinkingUI();
       if (thinkingTimeout) clearTimeout(thinkingTimeout);
@@ -493,6 +497,22 @@
   }
 
   initOrbit();
+
+  /* v81: tap avatar to replay the last memo (Hub touchscreen) */
+  wrapEl.style.cursor = 'pointer';
+  wrapEl.addEventListener('click', function () {
+    var a = document.getElementById('fallback-audio');
+    var isPlaying = a && !a.paused && !a.ended;
+    if (lastAudioUrl && !isPlaying) {
+      setThinkingUI();
+      setOrbitState('spinup');
+      spinupStart = Date.now();
+      if (thinkingTimeout) clearTimeout(thinkingTimeout);
+      thinkingTimeout = setTimeout(function () { setPlayingUI(true); }, 8000);
+      if (lastMsgData && lastMsgData.text) pendingText = lastMsgData.text;
+      playAudio(lastAudioUrl);
+    }
+  });
 
   /* v71: pop the avatar (video + outline + orbits) when the video can play.
      Poster hard-hides right after the pop. */
