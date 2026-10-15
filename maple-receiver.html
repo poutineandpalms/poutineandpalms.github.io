@@ -235,7 +235,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v83';
+  var RECEIVER_VERSION = 'js-v84';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -565,7 +565,7 @@
       var py = u * u * y + 2 * u * t * qy + t * t * ty;
       frames.push({ transform: 'translate(' + (px - x) + 'px,' + (py - y) + 'px) scale(' + (0.2 + 0.8 * t) + ')' });
     }
-    var anim = dot.animate(frames, { duration: 900, easing: 'cubic-bezier(0.22,1,0.36,1)', fill: 'forwards' });
+    var anim = dot.animate(frames, { duration: 1000, easing: 'cubic-bezier(0.34,1.25,0.64,1)', fill: 'forwards' });
     anim.onfinish = function () {
       dot.remove();
       var spinner = document.createElement('div');
