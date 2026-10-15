@@ -235,7 +235,7 @@
 (function () {
   'use strict';
   var NAMESPACE = 'urn:x-cast:com.maple.speaker';
-  var RECEIVER_VERSION = 'js-v82';
+  var RECEIVER_VERSION = 'js-v83';
   var castMgr = null;
 
   document.getElementById('version').textContent = RECEIVER_VERSION;
@@ -530,11 +530,18 @@
       { color: '#ff8f00', glow: 'rgba(255,143,0,.55)' }
     ];
     var c = palette[Math.floor(Math.random() * palette.length)];
-    var size = 14 + Math.random() * 12;
+    var size = 10 + Math.random() * 22; /* 10-32px: wilder variation */
     var layer = document.getElementById('layer-front');
-    var orbitR = parseFloat(getComputedStyle(layer).getPropertyValue('--orbit-r')) || 100;
     var r = wrapEl.getBoundingClientRect();
     var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    /* Measure the true orbit radius from a live dot (breathing scale included) */
+    var orbitR = 100;
+    var liveDot = layer.querySelector('.odot');
+    if (liveDot) {
+      var dr = liveDot.getBoundingClientRect();
+      var dcx = dr.left + dr.width / 2, dcy = dr.top + dr.height / 2;
+      orbitR = Math.sqrt((dcx - cx) * (dcx - cx) + (dcy - cy) * (dcy - cy));
+    }
     var dx = x - cx, dy = y - cy;
     var dist = Math.sqrt(dx * dx + dy * dy) || 1;
     var joinAngle = Math.atan2(dy, dx) * 180 / Math.PI;
